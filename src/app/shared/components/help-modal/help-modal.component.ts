@@ -19,7 +19,6 @@ export class HelpModalComponent {
   dismiss() {
     this.modalController.dismiss();
   }
-
   statusInfo = [
     {
       icon: '⚪',
@@ -40,9 +39,9 @@ export class HelpModalComponent {
       description: 'Completed successfully'
     },
     {
-      icon: '🟠',
-      color: '#fd7e14',
-      label: 'Orange outline',
+      icon: '🟡',
+      color: '#ffc107',
+      label: 'Yellow outline',
       description: 'Skipped hunt'
     },
     {
@@ -50,12 +49,6 @@ export class HelpModalComponent {
       color: '#007bff',
       label: 'Blue outline',
       description: 'Late completion'
-    },
-    {
-      icon: '🟡',
-      color: '#ffc107',
-      label: 'Yellow highlight',
-      description: 'Currently active hunt'
     }
   ];
 }

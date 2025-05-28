@@ -128,22 +128,4 @@ export class AlertService {
       await alert.present();
     });
   }
-  async showHelpAlert(): Promise<void> {
-    const alert = await this.alertController.create({
-      header: 'Hunt Status Colors',
-      message: `
-        <div style="text-align: left; line-height: 1.6;">
-          <p><strong style="color: #ffffff;">⚪ White outline:</strong> Unlocked & ready to start</p>
-          <p><strong style="color: #666666;">⚫ Dark outline:</strong> Locked (complete previous hunt first)</p>
-          <p><strong style="color: #28a745;">🟢 Green outline:</strong> Completed successfully</p>
-          <p><strong style="color: #fd7e14;">🟠 Orange outline:</strong> Skipped hunt</p>
-          <p><strong style="color: #007bff;">🔵 Blue outline:</strong> Late completion</p>
-          <p><strong style="color: #ffc107;">🟡 Yellow highlight:</strong> Currently active hunt</p>
-        </div>
-      `,
-      buttons: ['OK']
-    });
-
-    await alert.present();
-  }
 }

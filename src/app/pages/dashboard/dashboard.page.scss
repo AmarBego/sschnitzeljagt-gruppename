@@ -15,14 +15,13 @@
   gap: 8px;
 }
 
-// Hunt button styling based on status
+// Hunt button styling
 .hunt-button {
-  // Base styling
   --border-radius: 12px;
-  height: 100px;
-  margin: 0;
   --border-width: 2px;
   --border-style: solid;
+  height: 100px;
+  margin: 0;
   
   .hunt-content {
     display: flex;
@@ -42,128 +41,36 @@
     }
   }
 
-  // Status-based styling
-  // White outline: unlocked / not completed / not started
-  &[data-status="unlocked"] {
-    --border-color: #ffffff;
-    --color: #ffffff;
-    
-    &:hover {
-      --border-color: #f5f5f5;
-      --color: #f5f5f5;
-    }
-    
-    .hunt-content {
-      .hunt-number,
-      .hunt-title {
-        color: #ffffff;
-      }
-    }
+  // Base styling for all statuses with content color inheritance
+  .hunt-content .hunt-number,
+  .hunt-content .hunt-title {
+    color: var(--color);
   }
 
-  // Darked out: locked / not completed / not started
-  &[data-status="locked"] {
-    --border-color: #666666;
-    --color: #666666;
-    opacity: 0.5;
-    
-    .hunt-content {
-      .hunt-number,
-      .hunt-title {
-        color: #666666;
-      }
-    }
+  // Status color definitions
+  &[data-status="unlocked"], &[data-status="started"] { 
+    --border-color: #ffffff; --color: #ffffff; 
+    &:hover { --border-color: #f5f5f5; --color: #f5f5f5; }
   }
-  // Green outline: unlocked / completed / started
-  &[data-status="completed"] {
-    --border-color: #28a745;
-    --color: #28a745;
-    
-    &:hover {
-      --border-color: #34ce57;
-      --color: #34ce57;
-    }
-    
-    .hunt-content {
-      .hunt-number,
-      .hunt-title {
-        color: #28a745;
-      }
-    }
+  &[data-status="started"] { background-color: rgba(255, 255, 255, 0.05); }
+  
+  &[data-status="locked"] { 
+    --border-color: #666666; --color: #666666; opacity: 0.5; 
   }
-
-  // Hunt started but not completed (white with slight emphasis)
-  &[data-status="started"] {
-    --border-color: #ffffff;
-    --color: #ffffff;
-    background-color: rgba(255, 255, 255, 0.05);
-    
-    &:hover {
-      --border-color: #f5f5f5;
-      --color: #f5f5f5;
-    }
-    
-    .hunt-content {
-      .hunt-number,
-      .hunt-title {
-        color: #ffffff;
-      }
-    }
+  
+  &[data-status="completed"] { 
+    --border-color: #28a745; --color: #28a745;
+    &:hover { --border-color: #34ce57; --color: #34ce57; }
   }
-
-  // Orange outline: unlocked / skipped / started
-  &[data-status="skipped"] {
-    --border-color: #fd7e14;
-    --color: #fd7e14;
-    
-    &:hover {
-      --border-color: #ff8c42;
-      --color: #ff8c42;
-    }
-    
-    .hunt-content {
-      .hunt-number,
-      .hunt-title {
-        color: #fd7e14;
-      }
-    }
+  
+  &[data-status="skipped"] { 
+    --border-color: #ffc107; --color: #ffc107;
+    &:hover { --border-color: #e0a800; --color: #e0a800; }
   }
-
-  // Blue outline: unlocked / late completion / started
-  &[data-status="late"] {
-    --border-color: #007bff;
-    --color: #007bff;
-    
-    &:hover {
-      --border-color: #0056b3;
-      --color: #0056b3;
-    }
-    
-    .hunt-content {
-      .hunt-number,
-      .hunt-title {
-        color: #007bff;
-      }
-    }
-  }
-
-  // Active hunt (currently running)
-  &[data-status="active"] {
-    --border-color: #ffc107;
-    --color: #ffc107;
-    background-color: rgba(255, 193, 7, 0.1);
-    
-    &:hover {
-      --border-color: #e0a800;
-      --color: #e0a800;
-    }
-    
-    .hunt-content {
-      .hunt-number,
-      .hunt-title {
-        color: #ffc107;
-      }
-    }
+  
+  &[data-status="late"] { 
+    --border-color: #007bff; --color: #007bff;
+    &:hover { --border-color: #0056b3; --color: #0056b3; }
   }
 }
 
@@ -174,51 +81,35 @@
   color: var(--ion-color-primary);
 }
 
-ion-toolbar {
-  --min-height: 56px;
-}
+// Component styling
+ion-toolbar { --min-height: 56px; }
 
-// Responsive design for larger screens
-@media (min-width: 768px) {
-  .hunt-grid {
-    gap: 16px;
+ion-fab ion-fab-button {
+  --background: rgba(255, 69, 58, 0.9);
+  --background-activated: rgba(255, 69, 58, 1);
+  --color: white;
+  --box-shadow: 0 4px 16px rgba(255, 69, 58, 0.3);
+  --border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  
+  &:hover {
+    --background: rgba(255, 69, 58, 1);
+    --box-shadow: 0 6px 20px rgba(255, 69, 58, 0.4);
   }
   
-  .hunt-button {
+  ion-icon { font-size: 20px; color: white; }
+}
+
+// Responsive & Modal styling
+@media (min-width: 768px) {
+  .hunt-grid { gap: 16px; }
+  .hunt-button { 
     height: 120px;
-    
-    .hunt-content {
-      .hunt-title {
-        font-size: 14px;
-      }
-    }
+    .hunt-content .hunt-title { font-size: 14px; }
   }
 }
 
-// Floating reset button styling
-ion-fab {
-  ion-fab-button {
-    --background: rgba(255, 69, 58, 0.9);
-    --background-activated: rgba(255, 69, 58, 1);
-    --color: white;
-    --box-shadow: 0 4px 16px rgba(255, 69, 58, 0.3);
-    --border-radius: 50%;
-    width: 48px;
-    height: 48px;
-    
-    &:hover {
-      --background: rgba(255, 69, 58, 1);
-      --box-shadow: 0 6px 20px rgba(255, 69, 58, 0.4);
-    }
-    
-    ion-icon {
-      font-size: 20px;
-      color: white;
-    }
-  }
-}
-
-// Help modal styling
 :global(.help-modal) {
   --max-width: 90%;
   --max-height: 90%;

@@ -83,13 +83,11 @@ export class DashboardPage implements OnInit, OnDestroy {
       // Similar to startHunt, await if it were an async operation.
       this.huntService.completeHunt(hunt.id);
     }
-  }
-  getHuntStatus(hunt: Hunt): string {
+  }  getHuntStatus(hunt: Hunt): string {
     if (!hunt.isUnlocked) return 'locked';
     if (hunt.isCompleted && hunt.isLateCompletion) return 'late';
     if (hunt.isCompleted) return 'completed';
     if (hunt.isSkipped) return 'skipped';
-    if (this.currentActiveHunt === hunt.id) return 'active';
     if (hunt.startTime && !hunt.isCompleted) return 'started';
     return 'unlocked';
   }
