@@ -7,6 +7,8 @@ export interface Hunt {
   startTime?: Date;
   completionTime?: Date;
   duration?: number; // in seconds
+  isSkipped?: boolean;
+  isLateCompletion?: boolean;
 }
 
 export interface HuntProgress {

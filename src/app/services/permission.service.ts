@@ -7,33 +7,13 @@ import { Capacitor } from '@capacitor/core';
 export class PermissionService {
   
   async requestLocationPermission(): Promise<boolean> {
-    if (Capacitor.isNativePlatform()) {
-      // For native platforms, we'll add proper geolocation permissions later
-      return this.requestWebLocationPermission();
-    } else {
-      return this.requestWebLocationPermission();
-    }
-  }
-
-  private async requestWebLocationPermission(): Promise<boolean> {
-    return new Promise((resolve) => {
-      if (!navigator.geolocation) {
-        resolve(false);
-        return;
-      }
-
-      navigator.geolocation.getCurrentPosition(
-        () => resolve(true),
-        () => resolve(false),
-        { timeout: 5000 }
-      );
-    });
+    return Capacitor.isNativePlatform() 
+      ? this.requestWebLocationPermission() // Will be enhanced for native later
+      : this.requestWebLocationPermission();
   }
 
   async checkLocationPermission(): Promise<boolean> {
-    if (!navigator.permissions) {
-      return false;
-    }
+    if (!navigator.permissions) return false;
 
     try {
       const result = await navigator.permissions.query({ name: 'geolocation' as PermissionName });
@@ -41,5 +21,21 @@ export class PermissionService {
     } catch {
       return false;
     }
+  }
+
+  private async requestWebLocationPermission(): Promise<boolean> {
+    if (!navigator.geolocation) return false;
+
+    return new Promise((resolve) => {
+      navigator.geolocation.getCurrentPosition(
+        () => resolve(true),
+        () => resolve(false),
+        { 
+          timeout: 5000,
+          enableHighAccuracy: false,
+          maximumAge: 300000 // 5 minutes
+        }
+      );
+    });
   }
 }

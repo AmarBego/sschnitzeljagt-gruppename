@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { AlertController } from '@ionic/angular/standalone';
 
 @Injectable({
@@ -6,7 +6,7 @@ import { AlertController } from '@ionic/angular/standalone';
 })
 export class AlertService {
   
-  constructor(private alertController: AlertController) {}
+  private readonly alertController = inject(AlertController);
 
   async showWelcomeAlert(): Promise<string | null> {
     return new Promise(async (resolve) => {
@@ -29,15 +29,16 @@ export class AlertService {
             text: 'Close',
             role: 'cancel',
             handler: () => resolve(null)
-          },          {
+          },
+          {
             text: 'Next',
             handler: (data) => {
-              if (data.userName?.trim()) {
-                resolve(data.userName.trim());
+              const name = data.userName?.trim();
+              if (name) {
+                resolve(name);
                 return true;
-              } else {
-                return false; // Prevent closing if name is empty
               }
+              return false; // Prevent closing if name is empty
             }
           }
         ],
@@ -46,15 +47,12 @@ export class AlertService {
 
       await alert.present();
     });
-  }
-  async showPermissionAlert(): Promise<boolean> {
+  }  async showPermissionAlert(): Promise<boolean> {
     return new Promise(async (resolve) => {
       const alert = await this.alertController.create({
         subHeader: 'Permissions Required',
         cssClass: 'permission-alert',
-        message: `
-        woww
-        `,
+        message: 'This app requires location permission to function properly. Your location data is used only for hunt activities and is not shared with third parties.',
         buttons: [
           {
             text: 'Cancel',
@@ -96,7 +94,6 @@ export class AlertService {
       await alert.present();
     });
   }
-
   async showErrorAlert(message: string): Promise<void> {
     const alert = await this.alertController.create({
       header: 'Yapp',
@@ -130,5 +127,23 @@ export class AlertService {
 
       await alert.present();
     });
+  }
+  async showHelpAlert(): Promise<void> {
+    const alert = await this.alertController.create({
+      header: 'Hunt Status Colors',
+      message: `
+        <div style="text-align: left; line-height: 1.6;">
+          <p><strong style="color: #ffffff;">⚪ White outline:</strong> Unlocked & ready to start</p>
+          <p><strong style="color: #666666;">⚫ Dark outline:</strong> Locked (complete previous hunt first)</p>
+          <p><strong style="color: #28a745;">🟢 Green outline:</strong> Completed successfully</p>
+          <p><strong style="color: #fd7e14;">🟠 Orange outline:</strong> Skipped hunt</p>
+          <p><strong style="color: #007bff;">🔵 Blue outline:</strong> Late completion</p>
+          <p><strong style="color: #ffc107;">🟡 Yellow highlight:</strong> Currently active hunt</p>
+        </div>
+      `,
+      buttons: ['OK']
+    });
+
+    await alert.present();
   }
 }

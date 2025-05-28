@@ -1,28 +1,35 @@
-<ion-header [translucent]="true">  <ion-toolbar>
+<ion-header [translucent]="true">
+  <ion-toolbar>
     <ion-title>Yapp</ion-title>
-    @if (currentTimer > 0) {
-      <div slot="end" class="timer-display">
-        {{ formatTime(currentTimer) }}
-      </div>
-    }
+    <div slot="end" class="toolbar-end">
+      @if (currentTimer > 0) {
+        <div class="timer-display">
+          {{ formatTime(currentTimer) }}
+        </div>
+      }
+      <ion-button fill="clear" size="small" (click)="onHelpClick()">
+        <ion-icon name="help-circle-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </div>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
+<ion-content [fullscreen]="true">  <ion-header collapse="condense">
     <ion-toolbar>
       <ion-title size="large">Yapp</ion-title>
+      <ion-button fill="clear" slot="end" (click)="onHelpClick()">
+        <ion-icon name="help-circle-outline" slot="icon-only"></ion-icon>
+      </ion-button>
     </ion-toolbar>
   </ion-header>
-  <div class="dashboard-container">
-    <div class="hunt-grid">
+  <div class="dashboard-container">    <div class="hunt-grid">
       @for (hunt of hunts; track hunt.id) {
         <ion-button
-          [color]="getHuntButtonColor(hunt)"
-          [fill]="getHuntButtonFill(hunt)"
+          fill="outline"
           [disabled]="!hunt.isUnlocked"
           (click)="onHuntClick(hunt)"
-          class="hunt-button">
+          class="hunt-button"
+          [attr.data-status]="getHuntStatus(hunt)">
           <div class="hunt-content">
             <div class="hunt-number">{{ hunt.id }}</div>
             <div class="hunt-title">{{ getHuntDisplayTitle(hunt) }}</div>

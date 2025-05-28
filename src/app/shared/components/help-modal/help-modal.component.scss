@@ -1,0 +1,120 @@
+.help-content {
+  --padding-start: 0;
+  --padding-end: 0;
+}
+
+.help-container {
+  padding: 16px;
+}
+
+.intro-section {
+  margin-bottom: 24px;
+  text-align: center;
+
+  h2 {
+    color: var(--ion-color-primary);
+    margin-bottom: 12px;
+    font-weight: 600;
+  }
+
+  p {
+    color: var(--ion-color-medium);
+    line-height: 1.5;
+  }
+}
+
+.status-list {
+  margin-bottom: 24px;
+}
+
+.status-card {
+  margin: 8px 0;
+  --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.status-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.status-icon-container {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ion-color-light);
+  border-radius: 50%;
+}
+
+.status-icon {
+  font-size: 24px;
+}
+
+.status-details {
+  flex: 1;
+
+  h3 {
+    margin: 0 0 4px 0;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  p {
+    margin: 0;
+    color: var(--ion-color-medium);
+    font-size: 14px;
+    line-height: 1.4;
+  }
+}
+
+.tips-section {
+  ion-card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--ion-color-warning);
+
+    ion-icon {
+      font-size: 20px;
+    }
+  }
+}
+
+.tips-list {
+  margin: 0;
+  padding-left: 20px;
+  
+  li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+    color: var(--ion-color-medium);
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+ion-footer ion-toolbar {
+  --background: transparent;
+  --border-color: var(--ion-color-light);
+}
+
+// Dark mode adjustments
+@media (prefers-color-scheme: dark) {
+  .status-icon-container {
+    background: var(--ion-color-dark);
+  }
+}
+
+// Responsive design
+@media (min-width: 768px) {
+  .help-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+}

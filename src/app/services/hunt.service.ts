@@ -1,29 +1,24 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, interval, Subscription } from 'rxjs';
+import { Injectable, inject } from '@angular/core';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { Hunt, HuntProgress } from '../models/hunt.model';
 import { UserService } from './user.service';
+import { TimerService } from './timer.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class HuntService {
   private readonly STORAGE_KEY = 'hunt_progress';
-  private progressSubject = new BehaviorSubject<HuntProgress>(this.getInitialProgress());
-  private timerSubject = new BehaviorSubject<number>(0);
-  private timerSubscription?: Subscription;
-  private activeHuntStartTime?: Date;
+  private readonly progressSubject = new BehaviorSubject<HuntProgress>(this.getInitialProgress());
+  
+  private readonly userService = inject(UserService);
+  private readonly timerService = inject(TimerService);
 
-  constructor(private userService: UserService) {
+  constructor() {
     this.loadProgress();
   }
-
-  get progress$(): Observable<HuntProgress> {
-    return this.progressSubject.asObservable();
-  }
-
-  get timer$(): Observable<number> {
-    return this.timerSubject.asObservable();
-  }
+  readonly progress$ = this.progressSubject.asObservable();
+  readonly timer$ = this.timerService.timer$;
 
   get currentProgress(): HuntProgress {
     return this.progressSubject.value;
@@ -31,61 +26,127 @@ export class HuntService {
 
   startHunt(huntId: number): void {
     const progress = this.currentProgress;
-    const hunt = progress.hunts.find(h => h.id === huntId);
+    const validationResult = this.validateHuntStart(progress, huntId);
     
-    if (!hunt || !hunt.isUnlocked || hunt.isCompleted) {
-      return;
+    if (!validationResult.isValid) {
+      throw new Error(validationResult.error!);
     }
 
-    // Start timer
-    this.activeHuntStartTime = new Date();
-    hunt.startTime = this.activeHuntStartTime;
+    const hunt = validationResult.hunt!;
+    hunt.startTime = new Date();
     progress.currentActiveHunt = huntId;
 
-    this.startTimer();
+    this.timerService.startTimer(hunt.startTime);
     this.updateProgress(progress);
   }
 
-  completeHunt(huntId: number): void {
-    const progress = this.currentProgress;
-    const hunt = progress.hunts.find(h => h.id === huntId);
-    
-    if (!hunt || hunt.isCompleted) {
-      return;
+  private validateHuntStart(progress: HuntProgress, huntId: number) {
+    if (progress.currentActiveHunt !== undefined && progress.currentActiveHunt !== huntId) {
+      const activeHuntDetails = progress.hunts.find(h => h.id === progress.currentActiveHunt);
+      return { 
+        isValid: false, 
+        error: `Cannot start Hunt ID ${huntId}. Hunt '${activeHuntDetails?.title || progress.currentActiveHunt}' is already in progress.` 
+      };
     }
 
-    // Complete current hunt
-    hunt.isCompleted = true;
-    hunt.completionTime = new Date();
-    
-    if (hunt.startTime) {
-      hunt.duration = Math.floor((hunt.completionTime.getTime() - hunt.startTime.getTime()) / 1000);
+    const hunt = progress.hunts.find(h => h.id === huntId);
+    if (!hunt) {
+      return { 
+        isValid: false, 
+        error: `HuntService: Hunt with ID ${huntId} not found.` 
+      };
     }
+
+    if (!hunt.isUnlocked) {
+      return { 
+        isValid: false, 
+        error: `HuntService: Hunt '${hunt.title}' (ID ${huntId}) is locked and cannot be started.` 
+      };
+    }
+
+    if (hunt.isCompleted) {
+      return { 
+        isValid: false, 
+        error: `HuntService: Hunt '${hunt.title}' (ID ${huntId}) is already completed.` 
+      };
+    }
+
+    return { isValid: true, hunt };
+  }
+  completeHunt(huntId: number): void {
+    const progress = this.currentProgress;
+    const validationResult = this.validateHuntCompletion(progress, huntId);
+    
+    if (!validationResult.isValid) {
+      throw new Error(validationResult.error!);
+    }
+
+    const hunt = validationResult.hunt!;
+    const completionTime = new Date();
+    
+    hunt.isCompleted = true;
+    hunt.completionTime = completionTime;
+    hunt.duration = hunt.startTime ? 
+      Math.floor((completionTime.getTime() - hunt.startTime.getTime()) / 1000) : 0;
 
     progress.totalCompleted++;
     progress.currentActiveHunt = undefined;
 
-    // Unlock next hunt
+    this.unlockNextHunt(progress, huntId);
+    this.timerService.stopTimer();
+    this.updateProgress(progress);
+  }
+
+  private validateHuntCompletion(progress: HuntProgress, huntId: number) {
+    const hunt = progress.hunts.find(h => h.id === huntId);
+    if (!hunt) {
+      return { 
+        isValid: false, 
+        error: `HuntService: Hunt with ID ${huntId} not found.` 
+      };
+    }
+
+    if (progress.currentActiveHunt !== huntId) {
+      return { 
+        isValid: false, 
+        error: `HuntService: Cannot complete Hunt '${hunt.title}' (ID ${huntId}). It is not the currently active hunt.` 
+      };
+    }
+
+    if (hunt.isCompleted) {
+      return { 
+        isValid: false, 
+        error: `HuntService: Hunt '${hunt.title}' (ID ${huntId}) is already completed.` 
+      };
+    }
+
+    if (!hunt.startTime) {
+      return { 
+        isValid: false, 
+        error: `HuntService: Cannot complete Hunt '${hunt.title}' (ID ${huntId}). Start time is missing.` 
+      };
+    }
+
+    return { isValid: true, hunt };
+  }
+
+  private unlockNextHunt(progress: HuntProgress, huntId: number): void {
     const nextHunt = progress.hunts.find(h => h.id === huntId + 1);
     if (nextHunt) {
       nextHunt.isUnlocked = true;
     }
-
-    this.stopTimer();
-    this.updateProgress(progress);
   }
-
   resetProgress(): void {
     const initialProgress = this.getInitialProgress();
     this.updateProgress(initialProgress);
-    this.stopTimer();
+    this.timerService.stopTimer();
   }
 
   resetUserProgress(): void {
     // Reset hunt progress
     const initialProgress = this.getInitialProgress();
     this.updateProgress(initialProgress);
-    this.stopTimer();
+    this.timerService.stopTimer();
     
     // Clear user-specific data
     this.userService.clearUserData();
@@ -94,29 +155,32 @@ export class HuntService {
   reloadUserProgress(): void {
     // Reset to initial state first
     this.progressSubject.next(this.getInitialProgress());
-    this.stopTimer();
+    this.timerService.stopTimer();
     
     // Then load user-specific progress
     this.loadProgress();
-  }
+  }  private loadProgress(): void {
+    const storageKey = this.userService.getUserStorageKey(this.STORAGE_KEY);
+    const stored = localStorage.getItem(storageKey);
+    
+    if (!stored) return;
 
-  private startTimer(): void {
-    this.stopTimer();
-    this.timerSubscription = interval(1000).subscribe(() => {
-      if (this.activeHuntStartTime) {
-        const elapsed = Math.floor((new Date().getTime() - this.activeHuntStartTime.getTime()) / 1000);
-        this.timerSubject.next(elapsed);
-      }
-    });
-  }
-
-  private stopTimer(): void {
-    if (this.timerSubscription) {
-      this.timerSubscription.unsubscribe();
-      this.timerSubscription = undefined;
+    try {
+      const progress = JSON.parse(stored);
+      this.progressSubject.next(progress);
+      this.resumeActiveHuntTimer(progress);
+    } catch (error) {
+      console.error('Failed to load hunt progress:', error);
     }
-    this.timerSubject.next(0);
-    this.activeHuntStartTime = undefined;
+  }
+
+  private resumeActiveHuntTimer(progress: HuntProgress): void {
+    if (!progress.currentActiveHunt) return;
+
+    const activeHunt = progress.hunts.find(h => h.id === progress.currentActiveHunt);
+    if (activeHunt?.startTime && !activeHunt.isCompleted) {
+      this.timerService.startTimer(new Date(activeHunt.startTime));
+    }
   }
 
   private getInitialProgress(): HuntProgress {
@@ -132,30 +196,10 @@ export class HuntService {
       totalCompleted: 0
     };
   }
+
   private updateProgress(progress: HuntProgress): void {
     const storageKey = this.userService.getUserStorageKey(this.STORAGE_KEY);
     localStorage.setItem(storageKey, JSON.stringify(progress));
     this.progressSubject.next(progress);
-  }
-  private loadProgress(): void {
-    const storageKey = this.userService.getUserStorageKey(this.STORAGE_KEY);
-    const stored = localStorage.getItem(storageKey);
-    if (stored) {
-      try {
-        const progress = JSON.parse(stored);
-        this.progressSubject.next(progress);
-        
-        // Resume timer if there's an active hunt
-        if (progress.currentActiveHunt) {
-          const activeHunt = progress.hunts.find((h: Hunt) => h.id === progress.currentActiveHunt);
-          if (activeHunt?.startTime && !activeHunt.isCompleted) {
-            this.activeHuntStartTime = new Date(activeHunt.startTime);
-            this.startTimer();
-          }
-        }
-      } catch (error) {
-        console.error('Failed to load hunt progress:', error);
-      }
-    }
   }
 }

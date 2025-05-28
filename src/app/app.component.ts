@@ -1,15 +1,14 @@
 import { Component } from '@angular/core';
 import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { trashBin, home, search, person, settings } from 'ionicons/icons';
+import { trashBin, home, search, person, settings, helpCircleOutline, close, bulbOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
   imports: [IonApp, IonRouterOutlet],
 })
-export class AppComponent {
-  constructor() {
-    addIcons({ trashBin, home, search, person, settings });
+export class AppComponent {  constructor() {
+    addIcons({ trashBin, home, search, person, settings, helpCircleOutline, close, bulbOutline });
   }
 }

@@ -29,11 +29,12 @@ import {
   IonRouterOutlet,
   IonSplitPane,
   IonApp,
-  IonRouterLink
+  IonRouterLink,
+  IonFooter
 } from '@ionic/angular/standalone';
 
 // Services and controllers
-export { AlertController } from '@ionic/angular/standalone';
+export { AlertController, ModalController } from '@ionic/angular/standalone';
 
 export const IONIC_COMPONENTS = [
   IonButton,
@@ -66,5 +67,6 @@ export const IONIC_COMPONENTS = [
   IonRouterOutlet,
   IonSplitPane,
   IonApp,
-  IonRouterLink
+  IonRouterLink,
+  IonFooter
 ];
