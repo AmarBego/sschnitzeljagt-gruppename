@@ -8,17 +8,16 @@ import { IONIC_COMPONENTS } from '../../utils/ionic.utils';
   template: `
     <div class="timer-container" [class.overdue]="isOverdue">
       <div class="timer-display">
-        <ion-icon name="time-outline" class="timer-icon"></ion-icon>
-        <span class="timer-text">{{ formatTime(timer) }}</span>
-      </div>
-
-      @if (hunt && hunt.maxDuration) {
-        <div class="duration-info">
+        <div class="timer-main">
+          <ion-icon name="time-outline" class="timer-icon"></ion-icon>
+          <span class="timer-text">{{ formatTime(timer) }}</span>
+        </div>
+        @if (hunt && hunt.maxDuration) {
           <div class="max-duration">
             Max: {{ formatTime(hunt.maxDuration) }}
           </div>
-        </div>
-      }
+        }
+      </div>
 
       @if (isOverdue) {
         <div class="overdue-indicator">
@@ -40,7 +39,6 @@ import { IONIC_COMPONENTS } from '../../utils/ionic.utils';
       }
 
       .timer-container.overdue {
-        background: var(--ion-color-danger-tint);
         border-color: var(--ion-color-danger);
         animation: pulse 2s infinite;
       }
@@ -56,13 +54,37 @@ import { IONIC_COMPONENTS } from '../../utils/ionic.utils';
           transform: scale(1);
         }
       }
-
       .timer-display {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        position: relative;
+      }
+
+      .timer-main {
+        margin-top: 8px;
         display: flex;
         align-items: center;
         justify-content: center;
         gap: 8px;
-        margin-bottom: 8px;
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+
+      .max-duration {
+        margin-top: 8px;
+        font-size: 14px;
+        opacity: 0.8;
+        color: var(--ion-color-medium);
+        white-space: nowrap;
+        margin-left: auto;
+      }
+
+      .timer-container.overdue .max-duration {
+        color: var(--ion-color-danger);
+        opacity: 0.9;
       }
 
       .timer-icon {
@@ -80,17 +102,8 @@ import { IONIC_COMPONENTS } from '../../utils/ionic.utils';
         font-weight: bold;
         color: var(--ion-color-primary);
       }
-
       .timer-container.overdue .timer-text {
         color: var(--ion-color-danger);
-      }
-
-      .duration-info {
-        display: flex;
-        justify-content: space-between;
-        font-size: 12px;
-        opacity: 0.8;
-        margin-top: 8px;
       }
 
       .overdue-indicator {
