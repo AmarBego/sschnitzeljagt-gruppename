@@ -11,14 +11,14 @@
     </ion-toolbar>
   </ion-header>
 
-  <ng-container *ngIf="huntData.isHuntActive; else inactiveHunt">
+  @if (huntData.isHuntActive) {
     <app-hunt-timer
       [timer]="huntData.timer"
       [hunt]="huntData.currentHunt"
       [isOverdue]="isOverdue"
     >
     </app-hunt-timer>
-  </ng-container>
+  }
 
   <ng-template #inactiveHunt>
     <div class="hunt-content">

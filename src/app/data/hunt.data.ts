@@ -15,7 +15,7 @@ export const INITIAL_HUNTS: Hunt[] = [
     description: 'Follow the hidden trail',
     isCompleted: false,
     isUnlocked: false,
-    maxDuration: 450,
+    maxDuration: 10,
   }, // 7.5 minutes
   {
     id: 3,

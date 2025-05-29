@@ -132,7 +132,11 @@ export class HuntPageHelper implements OnDestroy {
         const hunt = this.huntPageData.currentHunt;
         if (!hunt || !hunt.isUnlocked) return '';
         if (this.isCurrentHuntActiveAndModifiable) {
-          if (this.isHuntOverdue(hunt)) {
+          // Use HuntService for overdue check
+          if (
+            hunt.id !== undefined &&
+            this.huntService.isHuntOverdue(hunt.id)
+          ) {
             return 'complete';
           }
           return 'skip';
@@ -163,14 +167,10 @@ export class HuntPageHelper implements OnDestroy {
     if (hunt.isCompleted && hunt.isLateCompletion) return 'late';
     if (hunt.isCompleted) return 'completed';
     if (hunt.isSkipped) return 'skipped';
+    // Use HuntService for overdue check if needed for status, though current logic doesn't show 'overdue' as a status
+    // For example, if (hunt.id !== undefined && this.huntService.isHuntOverdue(hunt.id) && !hunt.isCompleted) return 'overdue';
     if (hunt.startTime && !hunt.isCompleted) return 'started';
     return 'unlocked';
-  }
-
-  // Check if hunt has exceeded its maximum duration
-  isHuntOverdue(hunt?: Hunt): boolean {
-    if (!hunt || !hunt.maxDuration || !hunt.startTime) return false;
-    return this.huntPageData.timer > hunt.maxDuration;
   }
 
   // Get remaining time if hunt has a max duration

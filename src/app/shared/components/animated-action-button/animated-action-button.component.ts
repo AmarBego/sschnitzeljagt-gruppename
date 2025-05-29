@@ -174,7 +174,7 @@ export class AnimatedActionButtonComponent
       position: 'end',
     },
     complete: {
-      icon: 'checkmark-circle',
+      icon: 'checkmark',
       color: 'success',
       position: 'end',
     },

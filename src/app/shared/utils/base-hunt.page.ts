@@ -10,6 +10,7 @@ import {
   HuntActionButtonConfig,
 } from './hunt-page.helper';
 import { Hunt } from '../../models/hunt.model';
+import { HuntService } from '../../services/hunt.service';
 
 @Component({
   template: '', // Base component, no template
@@ -24,6 +25,7 @@ import { Hunt } from '../../models/hunt.model';
 })
 export abstract class BaseHuntPage implements OnInit, OnDestroy {
   protected huntHelper = inject(HuntPageHelper);
+  protected huntService = inject(HuntService);
 
   huntData: HuntPageData = {
     timer: 0,
@@ -48,10 +50,6 @@ export abstract class BaseHuntPage implements OnInit, OnDestroy {
     this.huntHelper.ngOnDestroy();
   }
 
-  get isOverdue(): boolean {
-    return this.huntHelper.isHuntOverdue(this.huntData.currentHunt);
-  }
-
   get actionButtonConfig(): HuntActionButtonConfig {
     return this.huntHelper.actionButtonConfiguration;
   }
@@ -64,11 +62,14 @@ export abstract class BaseHuntPage implements OnInit, OnDestroy {
     return this.huntHelper.getHuntStatus(hunt);
   }
 
-  isHuntOverdue(hunt?: Hunt): boolean {
-    return this.huntHelper.isHuntOverdue(hunt);
-  }
-
   getRemainingTime(hunt?: Hunt): number | null {
     return this.huntHelper.getRemainingTime(hunt);
+  }
+
+  get isOverdue(): boolean {
+    if (this.huntData.currentHunt?.id !== undefined) {
+      return this.huntService.isHuntOverdue(this.huntData.currentHunt.id);
+    }
+    return false;
   }
 }
