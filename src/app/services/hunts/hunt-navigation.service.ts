@@ -1,6 +1,9 @@
+// This service manages navigation related to hunts.
+// It ensures that if a hunt is active, the user is redirected to the active hunt page
+// if they attempt to navigate elsewhere (e.g., using browser back button).
 import { Injectable } from '@angular/core';
 import { Router, NavigationStart } from '@angular/router';
-import { HuntService } from './hunt.service';
+import { HuntService } from '../hunt.service';
 import { filter } from 'rxjs/operators';
 import { NavController } from '@ionic/angular';
 
