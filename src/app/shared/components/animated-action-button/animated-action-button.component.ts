@@ -7,6 +7,7 @@ import {
   OnDestroy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router'; // Added Router
 import { Subject, takeUntil } from 'rxjs';
 import { HuntService } from '../../../services/hunt.service';
 import { AlertService } from '../../../services/alert.service';
@@ -27,13 +28,14 @@ export class AnimatedActionButtonComponent implements OnInit, OnDestroy {
   @Output() actionPerformed = new EventEmitter<ButtonState>();
   currentState: ButtonState = 'reset';
   currentHunt?: Hunt;
-  isVisible = true;
+  isVisible = true; // Keep this to control visibility
 
   private destroy$ = new Subject<void>();
   constructor(
     private huntService: HuntService,
     private alertService: AlertService,
-    private timerService: TimerService
+    private timerService: TimerService,
+    private router: Router // Injected Router
   ) {}
   ngOnInit(): void {
     // Subscribe to hunt progress to determine button state
@@ -56,37 +58,47 @@ export class AnimatedActionButtonComponent implements OnInit, OnDestroy {
   }
   private updateButtonState(progress: HuntProgress): void {
     const previousState = this.currentState;
+    const currentUrl = this.router.url;
 
-    if (progress.currentActiveHunt) {
+    // Determine page type first
+    const isOnDashboard = currentUrl.startsWith('/dashboard');
+    const isOnHuntPage = currentUrl.startsWith('/hunt');
+
+    // Default to hidden
+    this.isVisible = false;
+    this.currentHunt = undefined;
+
+    if (isOnDashboard) {
+      // Dashboard: ONLY show reset button (never skip/complete)
+      this.currentState = 'reset';
+      this.isVisible = true;
+      this.currentHunt = undefined; // Reset is not tied to a specific hunt
+    } else if (isOnHuntPage && progress.currentActiveHunt) {
+      // Hunt pages: Show button as long as hunt is not completed and not skipped
       const activeHunt = progress.hunts.find(
         h => h.id === progress.currentActiveHunt
       );
-      if (activeHunt) {
+      if (activeHunt && !activeHunt.isCompleted && !activeHunt.isSkipped) {
         this.currentHunt = activeHunt;
+        this.isVisible = true;
 
-        // Check if all tasks in hunt are completed
-        // For now, we'll assume hunt is ready to complete if it's started
-        // You can modify this logic based on your hunt completion criteria
         if (this.isHuntReadyToComplete(activeHunt)) {
           this.currentState = 'complete';
         } else {
           this.currentState = 'skip';
         }
       }
-    } else {
-      this.currentState = 'reset';
-      this.currentHunt = undefined;
-    } // Force re-render of animation when state changes
+    }
+    // For all other cases (other pages, or hunt pages without active hunt), button stays hidden
+
     if (previousState !== this.currentState) {
       // State changed - position will update automatically via template
     }
   }
+
   private isHuntReadyToComplete(hunt: Hunt): boolean {
     // Check if hunt has started
     if (!hunt.startTime) return false;
-
-    // Check if timer is actually running for this hunt
-    if (!this.timerService.isRunning) return false;
 
     // Use timer service to get current elapsed time for accurate timing
     const currentElapsedTime = this.timerService.currentElapsedTime;
@@ -125,14 +137,18 @@ export class AnimatedActionButtonComponent implements OnInit, OnDestroy {
   }
 
   private async handleSkip(): Promise<void> {
-    if (!this.currentHunt) return;
+    if (!this.currentHunt) {
+      return;
+    }
 
     const shouldSkip = await this.alertService.showSkipHuntAlert(
       this.currentHunt.title
     );
+
     if (shouldSkip) {
       this.huntService.skipHunt(this.currentHunt.id);
       this.actionPerformed.emit('skip');
+      // Remove navigation - hunt-page helper will handle redirection
     }
   }
 

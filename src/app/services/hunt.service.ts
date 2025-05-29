@@ -10,7 +10,7 @@ import { INITIAL_HUNTS } from '../data/hunt.data';
 })
 export class HuntService {
   private readonly STORAGE_KEY = 'hunt_progress';
-  private readonly ABANDONMENT_THRESHOLD = 30000; // 30 seconds to consider abandoned
+  private readonly ABANDONMENT_THRESHOLD = 3000; // 3 seconds to consider abandoned (for testing)
   private readonly progressSubject = new BehaviorSubject<HuntProgress>(
     this.getInitialProgress()
   );
@@ -101,7 +101,9 @@ export class HuntService {
     hunt.isCompleted = true;
     hunt.completionTime = completionTime;
     hunt.duration = hunt.startTime
-      ? Math.floor((completionTime.getTime() - hunt.startTime.getTime()) / 1000)
+      ? Math.floor(
+          (completionTime.getTime() - new Date(hunt.startTime).getTime()) / 1000
+        )
       : 0;
 
     // Check if completion is late (exceeds maximum duration)
@@ -203,10 +205,16 @@ export class HuntService {
 
         // If app was away for more than threshold, mark hunt as abandoned
         if (timeAway > this.ABANDONMENT_THRESHOLD) {
-          this.markHuntAsSkipped(
-            progress.currentActiveHunt,
-            `App was away for ${Math.round(timeAway / 1000)} seconds`
+          const activeHunt = progress.hunts.find(
+            h => h.id === progress.currentActiveHunt
           );
+          // Only skip if hunt is not already completed or skipped
+          if (activeHunt && !activeHunt.isCompleted && !activeHunt.isSkipped) {
+            this.markHuntAsSkipped(
+              progress.currentActiveHunt,
+              `App was away for ${Math.round(timeAway / 1000)} seconds`
+            );
+          }
         }
       } catch (error) {
         console.error('Error checking abandoned hunt:', error);
@@ -221,7 +229,11 @@ export class HuntService {
     const activeHunt = progress.hunts.find(
       h => h.id === progress.currentActiveHunt
     );
-    if (activeHunt?.startTime && !activeHunt.isCompleted) {
+    if (
+      activeHunt?.startTime &&
+      !activeHunt.isCompleted &&
+      !activeHunt.isSkipped
+    ) {
       this.timerService.startTimer(
         new Date(activeHunt.startTime),
         activeHunt.id
@@ -253,10 +265,16 @@ export class HuntService {
     // Check if the hunt should be marked as abandoned when app comes back
     const progress = this.currentProgress;
     if (progress.currentActiveHunt && timeAway > this.ABANDONMENT_THRESHOLD) {
-      this.markHuntAsSkipped(
-        progress.currentActiveHunt,
-        'App was closed/minimized too long'
+      const activeHunt = progress.hunts.find(
+        h => h.id === progress.currentActiveHunt
       );
+      // Only skip if hunt is not already completed or skipped
+      if (activeHunt && !activeHunt.isCompleted && !activeHunt.isSkipped) {
+        this.markHuntAsSkipped(
+          progress.currentActiveHunt,
+          `App was away for ${Math.round(timeAway / 1000)} seconds`
+        );
+      }
     }
     localStorage.removeItem('app_background_time');
   }
@@ -277,13 +295,12 @@ export class HuntService {
       return;
     }
 
-    console.log(`Marking hunt ${huntId} as skipped: ${reason}`);
-
     hunt.isSkipped = true;
     hunt.completionTime = new Date();
     hunt.duration = hunt.startTime
       ? Math.floor(
-          (hunt.completionTime.getTime() - hunt.startTime.getTime()) / 1000
+          (hunt.completionTime.getTime() - new Date(hunt.startTime).getTime()) /
+            1000
         )
       : 0;
 

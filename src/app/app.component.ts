@@ -10,6 +10,7 @@ import {
   helpCircleOutline,
   close,
   bulbOutline,
+  timeOutline,
 } from 'ionicons/icons';
 import { HuntService } from './services/hunt.service';
 import { Subject, takeUntil } from 'rxjs';
@@ -34,6 +35,7 @@ export class AppComponent implements OnInit, OnDestroy {
       helpCircleOutline,
       close,
       bulbOutline,
+      timeOutline,
     });
   }
 
@@ -90,8 +92,9 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   private handleBeforeUnload() {
-    // App is being closed/refreshed
-    this.huntService.handleAppClose();
+    // Only mark hunt as abandoned on actual close, not refresh
+    // Set background time for refresh detection
+    this.huntService.handleAppBackground();
   }
 
   private handlePageHide() {

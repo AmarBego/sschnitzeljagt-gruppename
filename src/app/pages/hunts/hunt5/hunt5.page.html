@@ -1,13 +1,31 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>hunt5</ion-title>
+    <ion-title>Final Treasure</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
   <ion-header collapse="condense">
     <ion-toolbar>
-      <ion-title size="large">hunt5</ion-title>
+      <ion-title size="large">Final Treasure</ion-title>
     </ion-toolbar>
   </ion-header>
+
+  <ng-container *ngIf="huntData.isHuntActive">
+    <app-hunt-timer
+      [timer]="huntData.timer"
+      [hunt]="huntData.currentHunt"
+      [isOverdue]="isOverdue"
+    >
+    </app-hunt-timer>
+  </ng-container>
+
+  <div class="hunt-content">
+    <p>
+      Locate the final treasure! You're almost at the end of your adventure.
+    </p>
+  </div>
+
+  <app-animated-action-button (actionPerformed)="onActionPerformed($event)">
+  </app-animated-action-button>
 </ion-content>

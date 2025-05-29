@@ -7,6 +7,7 @@ import { AlertService } from '../../services/alert.service';
 import { ModalService } from '../../services/modal.service';
 import { Hunt, HuntProgress } from '../../models/hunt.model';
 import { IONIC_COMPONENTS } from '../../shared/utils/ionic.utils';
+import { HuntNavigationService } from '../../services/hunt-navigation.service'; // Added import
 import {
   AnimatedActionButtonComponent,
   ButtonState,
@@ -20,7 +21,6 @@ import {
 })
 export class DashboardPage implements OnInit, OnDestroy {
   hunts: Hunt[] = [];
-  currentTimer = 0;
   currentActiveHunt?: number;
 
   private destroy$ = new Subject<void>();
@@ -29,7 +29,8 @@ export class DashboardPage implements OnInit, OnDestroy {
     private userService: UserService,
     private huntService: HuntService,
     private alertService: AlertService,
-    private modalService: ModalService
+    private modalService: ModalService,
+    private huntNavigationService: HuntNavigationService // Injected service
   ) {}
 
   ngOnInit(): void {
@@ -47,10 +48,6 @@ export class DashboardPage implements OnInit, OnDestroy {
         this.hunts = progress.hunts;
         this.currentActiveHunt = progress.currentActiveHunt;
       });
-
-    this.huntService.timer$.pipe(takeUntil(this.destroy$)).subscribe(time => {
-      this.currentTimer = time;
-    });
   }
 
   ngOnDestroy(): void {
@@ -64,18 +61,18 @@ export class DashboardPage implements OnInit, OnDestroy {
       return;
     }
 
-    if (!hunt.isUnlocked || hunt.isCompleted) {
-      // Optionally, provide user feedback here e.g., via a toast message
+    if (!hunt.isUnlocked || hunt.isCompleted || hunt.isSkipped) {
+      // Prevent interaction with locked, completed, or skipped hunts
       return;
     }
 
     if (!hunt.startTime) {
       // Start the hunt
       this.huntService.startHunt(hunt.id);
+      this.huntNavigationService.navigateToHunt(hunt.id); // Navigate to hunt page
     } else {
-      // For demo purposes, complete the hunt after clicking
-      // In real app, this would be triggered by reaching location/scanning QR
-      this.huntService.completeHunt(hunt.id);
+      // If hunt is already started, navigate to it (e.g. if user comes back to dashboard)
+      this.huntNavigationService.navigateToHunt(hunt.id);
     }
   }
 
@@ -91,11 +88,6 @@ export class DashboardPage implements OnInit, OnDestroy {
   getHuntDisplayTitle(hunt: Hunt): string {
     if (!hunt.isUnlocked) return '?????';
     return hunt.title;
-  }
-  formatTime(seconds: number): string {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   }
 
   onActionPerformed(action: ButtonState): void {

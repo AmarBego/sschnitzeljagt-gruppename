@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
@@ -7,6 +7,15 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/angular/standalone';
+import {
+  AnimatedActionButtonComponent,
+  ButtonState,
+} from '../../../shared/components/animated-action-button/animated-action-button.component';
+import { HuntTimerComponent } from '../../../shared/components/hunt-timer/hunt-timer.component';
+import {
+  HuntPageHelper,
+  HuntPageData,
+} from '../../../shared/utils/hunt-page.helper';
 
 @Component({
   selector: 'app-hunt4',
@@ -20,10 +29,34 @@ import {
     IonToolbar,
     CommonModule,
     FormsModule,
+    AnimatedActionButtonComponent,
+    HuntTimerComponent,
   ],
+  providers: [HuntPageHelper],
 })
-export class Hunt4Page implements OnInit {
-  constructor() {}
+export class Hunt4Page implements OnInit, OnDestroy {
+  huntData: HuntPageData = {
+    timer: 0,
+    isHuntActive: false,
+  };
 
-  ngOnInit() {}
+  constructor(private huntHelper: HuntPageHelper) {}
+
+  ngOnInit() {
+    this.huntHelper.initializeForHunt(4, data => {
+      this.huntData = data;
+    });
+  }
+
+  ngOnDestroy() {
+    this.huntHelper.ngOnDestroy();
+  }
+
+  onActionPerformed(action: ButtonState): void {
+    this.huntHelper.onActionPerformed(action);
+  }
+
+  get isOverdue(): boolean {
+    return this.huntHelper.isHuntOverdue(this.huntData.currentHunt);
+  }
 }

@@ -1,13 +1,31 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>hunt3</ion-title>
+    <ion-title>Secret Location</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
   <ion-header collapse="condense">
     <ion-toolbar>
-      <ion-title size="large">hunt3</ion-title>
+      <ion-title size="large">Secret Location</ion-title>
     </ion-toolbar>
   </ion-header>
+
+  @if (huntData.isHuntActive) {
+    <app-hunt-timer
+      [timer]="huntData.timer"
+      [hunt]="huntData.currentHunt"
+      [isOverdue]="isOverdue"
+    >
+    </app-hunt-timer>
+  }
+
+  <div class="hunt-content">
+    <p>Discover the secret spot hidden in plain sight. Look carefully!</p>
+  </div>
+
+  <!-- Animated Action Button -->
+  <app-animated-action-button
+    (actionPerformed)="onActionPerformed($event)"
+  ></app-animated-action-button>
 </ion-content>

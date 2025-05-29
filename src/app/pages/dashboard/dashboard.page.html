@@ -2,9 +2,6 @@
   <ion-toolbar>
     <ion-title>Yapp</ion-title>
     <div slot="end" class="toolbar-end">
-      @if (currentTimer > 0) {
-        <div class="timer-display">{{ formatTime(currentTimer) }}</div>
-      }
       <ion-button fill="clear" size="small" (click)="onHelpClick()">
         <ion-icon name="help-circle-outline" slot="icon-only"></ion-icon>
       </ion-button>
@@ -27,7 +24,7 @@
         <div class="hunt-item">
           <ion-button
             fill="outline"
-            [disabled]="!hunt.isUnlocked"
+            [disabled]="!hunt.isUnlocked || hunt.isSkipped"
             (click)="onHuntClick(hunt)"
             class="hunt-button"
             [attr.data-status]="getHuntStatus(hunt)"
