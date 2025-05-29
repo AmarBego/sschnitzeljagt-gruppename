@@ -7,6 +7,7 @@ export interface Hunt {
   startTime?: Date;
   completionTime?: Date;
   duration?: number; // in seconds
+  maxDuration?: number; // maximum expected duration in seconds
   isSkipped?: boolean;
   isLateCompletion?: boolean;
 }

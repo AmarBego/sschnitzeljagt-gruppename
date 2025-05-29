@@ -2,11 +2,12 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject, takeUntil } from 'rxjs';
 import { UserService } from '../../services/user.service';
-import { HuntService } from '../../services/hunt.service';
+import { HuntService } from '../../services/hunt/hunt.service';
 import { AlertService } from '../../services/alert.service';
 import { ModalService } from '../../services/modal.service';
 import { Hunt, HuntProgress } from '../../models/hunt.model';
 import { IONIC_COMPONENTS } from '../../shared/ionic.utils';
+import { AnimatedActionButtonComponent, ButtonState } from '../../shared/components/animated-action-button/animated-action-button.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -14,7 +15,8 @@ import { IONIC_COMPONENTS } from '../../shared/ionic.utils';
   styleUrls: ['./dashboard.page.scss'],
   imports: [
     CommonModule,
-    ...IONIC_COMPONENTS
+    ...IONIC_COMPONENTS,
+    AnimatedActionButtonComponent
   ]
 })
 export class DashboardPage implements OnInit, OnDestroy {
@@ -22,7 +24,9 @@ export class DashboardPage implements OnInit, OnDestroy {
   currentTimer = 0;
   currentActiveHunt?: number;
   
-  private destroy$ = new Subject<void>();  constructor(
+  private destroy$ = new Subject<void>();
+
+  constructor(
     private userService: UserService,
     private huntService: HuntService,
     private alertService: AlertService,
@@ -38,7 +42,9 @@ export class DashboardPage implements OnInit, OnDestroy {
           // User logged in or changed, reload their progress
           this.huntService.reloadUserProgress();
         }
-      });    this.huntService.progress$
+      });
+
+    this.huntService.progress$
       .pipe(takeUntil(this.destroy$))
       .subscribe((progress: HuntProgress) => {
         this.hunts = progress.hunts;
@@ -56,6 +62,7 @@ export class DashboardPage implements OnInit, OnDestroy {
     this.destroy$.next();
     this.destroy$.complete();
   }
+
   onHuntClick(hunt: Hunt): void {
     if (!hunt || typeof hunt.id !== 'number') {
       console.error('Invalid hunt object provided to onHuntClick');
@@ -67,23 +74,17 @@ export class DashboardPage implements OnInit, OnDestroy {
       return;
     }
 
-    // It's good practice to ensure currentActiveHunt is managed correctly
-    // although huntService should already handle this.
-    // Consider if any local state needs to be guarded before these calls.
-
     if (!hunt.startTime) {
       // Start the hunt
-      // No explicit await needed if huntService.startHunt is synchronous
-      // and doesn't return a Promise. If it were async, you'd use:
-      // await this.huntService.startHunt(hunt.id);
       this.huntService.startHunt(hunt.id);
     } else {
       // For demo purposes, complete the hunt after clicking
       // In real app, this would be triggered by reaching location/scanning QR
-      // Similar to startHunt, await if it were an async operation.
       this.huntService.completeHunt(hunt.id);
     }
-  }  getHuntStatus(hunt: Hunt): string {
+  }
+
+  getHuntStatus(hunt: Hunt): string {
     if (!hunt.isUnlocked) return 'locked';
     if (hunt.isCompleted && hunt.isLateCompletion) return 'late';
     if (hunt.isCompleted) return 'completed';
@@ -96,22 +97,25 @@ export class DashboardPage implements OnInit, OnDestroy {
     if (!hunt.isUnlocked) return '?????';
     return hunt.title;
   }
-
   formatTime(seconds: number): string {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  }  async onResetClick(): Promise<void> {
-    const shouldReset = await this.alertService.showResetProgressAlert();
-    if (shouldReset) {
-      // Assuming resetUserProgress is synchronous or its completion
-      // doesn't need to be awaited for subsequent UI updates here.
-      // If it involved async operations that DashboardPage depends on immediately,
-      // it should return a Promise and be awaited.
-      this.huntService.resetUserProgress();
-      // Potentially reload or update local component state if necessary after reset
+  }
+
+  onActionPerformed(action: ButtonState): void {
+    // Handle any additional logic when button actions are performed
+    console.log(`Action performed: ${action}`);
+  }
+
+  async onSkipHunt(hunt: Hunt): Promise<void> {
+    const shouldSkip = await this.alertService.showSkipHuntAlert(hunt.title);
+    if (shouldSkip) {
+      this.huntService.skipHunt(hunt.id);
     }
-  }  async onHelpClick(): Promise<void> {
+  }
+
+  async onHelpClick(): Promise<void> {
     await this.modalService.showHelpModal();
   }
 }

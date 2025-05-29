@@ -7,12 +7,14 @@ import { AppComponent } from './app/app.component';
 
 // Import and register icons
 import { addIcons } from 'ionicons';
-import { locationOutline, qrCodeOutline } from 'ionicons/icons';
+import { locationOutline, qrCodeOutline, playSkipForward, checkmark } from 'ionicons/icons';
 
 // Register icons globally
 addIcons({
   'location-outline': locationOutline,
-  'qr-code-outline': qrCodeOutline
+  'qr-code-outline': qrCodeOutline,
+  'play-skip-forward': playSkipForward,
+  'checkmark': checkmark,
 });
 
 bootstrapApplication(AppComponent, {

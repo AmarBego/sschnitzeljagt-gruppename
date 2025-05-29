@@ -24,25 +24,26 @@
   </ion-header>
   <div class="dashboard-container">    <div class="hunt-grid">
       @for (hunt of hunts; track hunt.id) {
-        <ion-button
-          fill="outline"
-          [disabled]="!hunt.isUnlocked"
-          (click)="onHuntClick(hunt)"
-          class="hunt-button"
-          [attr.data-status]="getHuntStatus(hunt)">
-          <div class="hunt-content">
-            <div class="hunt-number">{{ hunt.id }}</div>
-            <div class="hunt-title">{{ getHuntDisplayTitle(hunt) }}</div>
-          </div>
-        </ion-button>
+        <div class="hunt-item">
+          <ion-button
+            fill="outline"
+            [disabled]="!hunt.isUnlocked"
+            (click)="onHuntClick(hunt)"
+            class="hunt-button"
+            [attr.data-status]="getHuntStatus(hunt)">
+            <div class="hunt-content">
+              <div class="hunt-number">{{ hunt.id }}</div>
+              <div class="hunt-title">{{ getHuntDisplayTitle(hunt) }}</div>
+            </div>
+          </ion-button>          
+        </div>
       }
-    </div>
+    </div>  
   </div>
 
-  <!-- Floating Reset Button -->
-  <ion-fab vertical="bottom" horizontal="start" slot="fixed">
-    <ion-fab-button color="danger" size="small" (click)="onResetClick()">
-      <ion-icon name="trash-bin"></ion-icon>
-    </ion-fab-button>
-  </ion-fab>
+  <!-- Animated Action Button -->
+  <app-animated-action-button 
+    position="bottom-start"
+    (actionPerformed)="onActionPerformed($event)">
+  </app-animated-action-button>
 </ion-content>

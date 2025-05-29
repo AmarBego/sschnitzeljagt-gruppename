@@ -74,6 +74,64 @@
   }
 }
 
+// Hunt item container styling
+.hunt-item {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  
+  .hunt-button {
+    flex: 1;
+    // ...existing hunt-button styles...
+  }
+  
+  .skip-button {
+    --background: rgba(255, 193, 7, 0.1);
+    --background-hover: rgba(255, 193, 7, 0.2);
+    --background-activated: rgba(255, 193, 7, 0.3);
+    --color: #ffc107;
+    --color-hover: #e0a800;
+    --border-radius: 12px;
+    --border-width: 2px;
+    --border-style: solid;
+    --border-color: #ffc107;
+    --box-shadow: none;
+    
+    width: 48px;
+    height: 100px;
+    margin: 0;
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    ion-icon {
+      font-size: 20px;
+      color: var(--color);
+    }
+    
+    &:hover {
+      --background: var(--background-hover);
+      --color: var(--color-hover);
+      --border-color: var(--color-hover);
+    }
+    
+    &:active {
+      --background: var(--background-activated);
+    }
+    
+    // Responsive sizing
+    @media (min-width: 768px) {
+      height: 120px;
+      width: 56px;
+      
+      ion-icon {
+        font-size: 24px;
+      }
+    }
+  }
+}
+
 .timer-display {
   font-family: 'Courier New', monospace;
   font-size: 16px;

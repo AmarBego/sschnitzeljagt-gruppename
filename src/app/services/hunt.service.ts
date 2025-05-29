@@ -9,6 +9,7 @@ import { TimerService } from './timer.service';
 })
 export class HuntService {
   private readonly STORAGE_KEY = 'hunt_progress';
+  private readonly ABANDONMENT_THRESHOLD = 30000; // 30 seconds to consider abandoned
   private readonly progressSubject = new BehaviorSubject<HuntProgress>(this.getInitialProgress());
   
   private readonly userService = inject(UserService);
@@ -30,13 +31,11 @@ export class HuntService {
     
     if (!validationResult.isValid) {
       throw new Error(validationResult.error!);
-    }
-
-    const hunt = validationResult.hunt!;
+    }    const hunt = validationResult.hunt!;
     hunt.startTime = new Date();
     progress.currentActiveHunt = huntId;
 
-    this.timerService.startTimer(hunt.startTime);
+    this.timerService.startTimer(hunt.startTime, huntId);
     this.updateProgress(progress);
   }
 
@@ -72,8 +71,7 @@ export class HuntService {
     }
 
     return { isValid: true, hunt };
-  }
-  completeHunt(huntId: number): void {
+  }  completeHunt(huntId: number): void {
     const progress = this.currentProgress;
     const validationResult = this.validateHuntCompletion(progress, huntId);
     
@@ -88,6 +86,11 @@ export class HuntService {
     hunt.completionTime = completionTime;
     hunt.duration = hunt.startTime ? 
       Math.floor((completionTime.getTime() - hunt.startTime.getTime()) / 1000) : 0;
+
+    // Check if completion is late (exceeds maximum duration)
+    if (hunt.maxDuration && hunt.duration > hunt.maxDuration) {
+      hunt.isLateCompletion = true;
+    }
 
     progress.totalCompleted++;
     progress.currentActiveHunt = undefined;
@@ -167,6 +170,10 @@ export class HuntService {
 
     try {
       const progress = JSON.parse(stored);
+      
+      // Check for abandoned hunts on app restart
+      this.checkForAbandonedHunt(progress);
+      
       this.progressSubject.next(progress);
       this.resumeActiveHuntTimer(progress);
     } catch (error) {
@@ -174,24 +181,43 @@ export class HuntService {
     }
   }
 
+  private checkForAbandonedHunt(progress: HuntProgress): void {
+    const backgroundTimeStr = localStorage.getItem('app_background_time');
+    
+    if (progress.currentActiveHunt && backgroundTimeStr) {
+      try {
+        const backgroundTime = new Date(backgroundTimeStr);
+        const currentTime = new Date();
+        const timeAway = currentTime.getTime() - backgroundTime.getTime();
+        
+        // If app was away for more than threshold, mark hunt as abandoned
+        if (timeAway > this.ABANDONMENT_THRESHOLD) {
+          this.markHuntAsSkipped(progress.currentActiveHunt, `App was away for ${Math.round(timeAway / 1000)} seconds`);
+        }
+      } catch (error) {
+        console.error('Error checking abandoned hunt:', error);
+      }
+      
+      localStorage.removeItem('app_background_time');
+    }
+  }
   private resumeActiveHuntTimer(progress: HuntProgress): void {
     if (!progress.currentActiveHunt) return;
 
     const activeHunt = progress.hunts.find(h => h.id === progress.currentActiveHunt);
     if (activeHunt?.startTime && !activeHunt.isCompleted) {
-      this.timerService.startTimer(new Date(activeHunt.startTime));
+      this.timerService.startTimer(new Date(activeHunt.startTime), activeHunt.id);
     }
   }
-
   private getInitialProgress(): HuntProgress {
     return {
       hunts: [
-        { id: 1, title: 'First Discovery', description: 'Find your first clue', isCompleted: false, isUnlocked: true },
-        { id: 2, title: 'Hidden Path', description: 'Follow the hidden trail', isCompleted: false, isUnlocked: false },
-        { id: 3, title: 'Secret Location', description: 'Discover the secret spot', isCompleted: false, isUnlocked: false },
-        { id: 4, title: 'Ancient Marker', description: 'Find the ancient marker', isCompleted: false, isUnlocked: false },
-        { id: 5, title: 'Final Treasure', description: 'Locate the final treasure', isCompleted: false, isUnlocked: false },
-        { id: 6, title: 'Ultimate Prize', description: 'Claim your ultimate prize', isCompleted: false, isUnlocked: false }
+        { id: 1, title: 'First Discovery', description: 'Find your first clue', isCompleted: false, isUnlocked: true, maxDuration: 300 }, // 5 minutes
+        { id: 2, title: 'Hidden Path', description: 'Follow the hidden trail', isCompleted: false, isUnlocked: false, maxDuration: 450 }, // 7.5 minutes
+        { id: 3, title: 'Secret Location', description: 'Discover the secret spot', isCompleted: false, isUnlocked: false, maxDuration: 600 }, // 10 minutes
+        { id: 4, title: 'Ancient Marker', description: 'Find the ancient marker', isCompleted: false, isUnlocked: false, maxDuration: 360 }, // 6 minutes
+        { id: 5, title: 'Final Treasure', description: 'Locate the final treasure', isCompleted: false, isUnlocked: false, maxDuration: 540 }, // 9 minutes
+        { id: 6, title: 'Ultimate Prize', description: 'Claim your ultimate prize', isCompleted: false, isUnlocked: false, maxDuration: 420 } // 7 minutes
       ],
       totalCompleted: 0
     };
@@ -201,5 +227,71 @@ export class HuntService {
     const storageKey = this.userService.getUserStorageKey(this.STORAGE_KEY);
     localStorage.setItem(storageKey, JSON.stringify(progress));
     this.progressSubject.next(progress);
+  }
+
+  handleAppBackground(): void {
+    // Save the time when app goes to background if there's an active hunt
+    const progress = this.currentProgress;
+    if (progress.currentActiveHunt) {
+      localStorage.setItem('app_background_time', new Date().toISOString());
+    }
+  }
+
+  handleAppForeground(timeAway: number): void {
+    // Check if the hunt should be marked as abandoned when app comes back
+    const progress = this.currentProgress;
+    if (progress.currentActiveHunt && timeAway > this.ABANDONMENT_THRESHOLD) {
+      this.markHuntAsSkipped(progress.currentActiveHunt, 'App was closed/minimized too long');
+    }
+    localStorage.removeItem('app_background_time');
+  }
+
+  handleAppClose(): void {
+    // Immediately mark active hunt as skipped when app is being closed
+    const progress = this.currentProgress;
+    if (progress.currentActiveHunt) {
+      this.markHuntAsSkipped(progress.currentActiveHunt, 'App was closed');
+    }
+  }
+
+  private markHuntAsSkipped(huntId: number, reason: string): void {
+    const progress = this.currentProgress;
+    const hunt = progress.hunts.find(h => h.id === huntId);
+    
+    if (!hunt || hunt.isCompleted || hunt.isSkipped) {
+      return;
+    }
+
+    console.log(`Marking hunt ${huntId} as skipped: ${reason}`);
+    
+    hunt.isSkipped = true;
+    hunt.completionTime = new Date();
+    hunt.duration = hunt.startTime ? 
+      Math.floor((hunt.completionTime.getTime() - hunt.startTime.getTime()) / 1000) : 0;
+
+    progress.currentActiveHunt = undefined;
+    
+    // Unlock next hunt even if this one was skipped
+    this.unlockNextHunt(progress, huntId);
+    this.timerService.stopTimer();
+    this.updateProgress(progress);
+  }
+  skipHunt(huntId: number): void {
+    this.markHuntAsSkipped(huntId, 'Manually skipped');
+  }
+
+  getHuntMaxDuration(huntId: number): number | undefined {
+    const hunt = this.currentProgress.hunts.find(h => h.id === huntId);
+    return hunt?.maxDuration;
+  }
+
+  isHuntOverdue(huntId: number): boolean {
+    const hunt = this.currentProgress.hunts.find(h => h.id === huntId);
+    if (!hunt || !hunt.startTime || !hunt.maxDuration) {
+      return false;
+    }
+
+    const elapsedTime = this.timerService.currentElapsedTime;
+    return elapsedTime > hunt.maxDuration;
   }
 }

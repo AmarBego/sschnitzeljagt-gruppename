@@ -1,14 +1,74 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { trashBin, home, search, person, settings, helpCircleOutline, close, bulbOutline } from 'ionicons/icons';
+import { HuntService } from './services/hunt/hunt.service';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
   imports: [IonApp, IonRouterOutlet],
 })
-export class AppComponent {  constructor() {
+export class AppComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
+  private huntService = inject(HuntService);
+  private appHiddenTime?: Date;
+
+  constructor() {
     addIcons({ trashBin, home, search, person, settings, helpCircleOutline, close, bulbOutline });
+  }
+
+  ngOnInit() {
+    // Listen for app visibility changes
+    this.setupAppLifecycleListeners();
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.removeAppLifecycleListeners();
+  }
+
+  private setupAppLifecycleListeners() {
+    // Listen for page visibility changes (web/PWA)
+    document.addEventListener('visibilitychange', this.handleVisibilityChange.bind(this));
+    
+    // Listen for beforeunload (web)
+    window.addEventListener('beforeunload', this.handleBeforeUnload.bind(this));
+    
+    // Listen for pagehide (web)
+    window.addEventListener('pagehide', this.handlePageHide.bind(this));
+  }
+
+  private removeAppLifecycleListeners() {
+    document.removeEventListener('visibilitychange', this.handleVisibilityChange.bind(this));
+    window.removeEventListener('beforeunload', this.handleBeforeUnload.bind(this));
+    window.removeEventListener('pagehide', this.handlePageHide.bind(this));
+  }
+
+  private handleVisibilityChange() {
+    if (document.hidden) {
+      // App went to background
+      this.appHiddenTime = new Date();
+      this.huntService.handleAppBackground();
+    } else {
+      // App came to foreground
+      if (this.appHiddenTime) {
+        const timeAway = Date.now() - this.appHiddenTime.getTime();
+        this.huntService.handleAppForeground(timeAway);
+        this.appHiddenTime = undefined;
+      }
+    }
+  }
+
+  private handleBeforeUnload() {
+    // App is being closed/refreshed
+    this.huntService.handleAppClose();
+  }
+
+  private handlePageHide() {
+    // App page is being hidden (mobile browsers)
+    this.huntService.handleAppBackground();
   }
 }

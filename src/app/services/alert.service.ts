@@ -128,4 +128,28 @@ export class AlertService {
       await alert.present();
     });
   }
+
+  async showSkipHuntAlert(huntTitle: string): Promise<boolean> {
+    return new Promise(async (resolve) => {
+      const alert = await this.alertController.create({
+        header: 'Skip Hunt',
+        message: `Are you sure you want to skip "${huntTitle}"? You can still unlock the next hunt, but this one will be marked as skipped.`,
+        buttons: [
+          {
+            text: 'Cancel',
+            role: 'cancel',
+            handler: () => resolve(false)
+          },
+          {
+            text: 'Skip',
+            role: 'destructive',
+            handler: () => resolve(true)
+          }
+        ],
+        backdropDismiss: false
+      });
+
+      await alert.present();
+    });
+  }
 }
