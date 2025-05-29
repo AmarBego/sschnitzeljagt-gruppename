@@ -3,6 +3,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { Hunt, HuntProgress } from '../models/hunt.model';
 import { UserService } from './user.service';
 import { TimerService } from './timer.service';
+import { INITIAL_HUNTS } from '../data/hunt.data';
 
 @Injectable({
   providedIn: 'root'
@@ -27,11 +28,9 @@ export class HuntService {
 
   startHunt(huntId: number): void {
     const progress = this.currentProgress;
-    const validationResult = this.validateHuntStart(progress, huntId);
+    this.validateHuntCanBeStarted(progress, huntId);
     
-    if (!validationResult.isValid) {
-      throw new Error(validationResult.error!);
-    }    const hunt = validationResult.hunt!;
+    const hunt = progress.hunts.find(h => h.id === huntId)!;
     hunt.startTime = new Date();
     progress.currentActiveHunt = huntId;
 
@@ -39,47 +38,45 @@ export class HuntService {
     this.updateProgress(progress);
   }
 
-  private validateHuntStart(progress: HuntProgress, huntId: number) {
+  private validateHuntCanBeStarted(progress: HuntProgress, huntId: number): void {
+    this.ensureHuntIsNotAlreadyActive(progress, huntId);
+    const hunt = this.findHuntOrFail(progress, huntId);
+    this.ensureHuntIsUnlocked(hunt);
+    this.ensureHuntIsNotCompleted(hunt);
+  }
+
+  private ensureHuntIsNotAlreadyActive(progress: HuntProgress, huntId: number): void {
     if (progress.currentActiveHunt !== undefined && progress.currentActiveHunt !== huntId) {
       const activeHuntDetails = progress.hunts.find(h => h.id === progress.currentActiveHunt);
-      return { 
-        isValid: false, 
-        error: `Cannot start Hunt ID ${huntId}. Hunt '${activeHuntDetails?.title || progress.currentActiveHunt}' is already in progress.` 
-      };
+      throw new Error(`Cannot start Hunt ID ${huntId}. Hunt '${activeHuntDetails?.title || progress.currentActiveHunt}' is already in progress.`);
     }
+  }
 
+  private findHuntOrFail(progress: HuntProgress, huntId: number): Hunt {
     const hunt = progress.hunts.find(h => h.id === huntId);
     if (!hunt) {
-      return { 
-        isValid: false, 
-        error: `HuntService: Hunt with ID ${huntId} not found.` 
-      };
+      throw new Error(`HuntService: Hunt with ID ${huntId} not found.`);
     }
+    return hunt;
+  }
 
+  private ensureHuntIsUnlocked(hunt: Hunt): void {
     if (!hunt.isUnlocked) {
-      return { 
-        isValid: false, 
-        error: `HuntService: Hunt '${hunt.title}' (ID ${huntId}) is locked and cannot be started.` 
-      };
+      throw new Error(`HuntService: Hunt '${hunt.title}' (ID ${hunt.id}) is locked and cannot be started.`);
     }
+  }
 
+  private ensureHuntIsNotCompleted(hunt: Hunt): void {
     if (hunt.isCompleted) {
-      return { 
-        isValid: false, 
-        error: `HuntService: Hunt '${hunt.title}' (ID ${huntId}) is already completed.` 
-      };
+      throw new Error(`HuntService: Hunt '${hunt.title}' (ID ${hunt.id}) is already completed.`);
     }
+  }
 
-    return { isValid: true, hunt };
-  }  completeHunt(huntId: number): void {
+  completeHunt(huntId: number): void {
     const progress = this.currentProgress;
-    const validationResult = this.validateHuntCompletion(progress, huntId);
-    
-    if (!validationResult.isValid) {
-      throw new Error(validationResult.error!);
-    }
+    this.validateHuntCanBeCompleted(progress, huntId);
 
-    const hunt = validationResult.hunt!;
+    const hunt = progress.hunts.find(h => h.id === huntId)!;
     const completionTime = new Date();
     
     hunt.isCompleted = true;
@@ -100,37 +97,23 @@ export class HuntService {
     this.updateProgress(progress);
   }
 
-  private validateHuntCompletion(progress: HuntProgress, huntId: number) {
-    const hunt = progress.hunts.find(h => h.id === huntId);
-    if (!hunt) {
-      return { 
-        isValid: false, 
-        error: `HuntService: Hunt with ID ${huntId} not found.` 
-      };
-    }
+  private validateHuntCanBeCompleted(progress: HuntProgress, huntId: number): void {
+    const hunt = this.findHuntOrFail(progress, huntId);
+    this.ensureHuntIsActive(progress, hunt);
+    this.ensureHuntIsNotCompleted(hunt);
+    this.ensureHuntHasStartTime(hunt);
+  }
 
-    if (progress.currentActiveHunt !== huntId) {
-      return { 
-        isValid: false, 
-        error: `HuntService: Cannot complete Hunt '${hunt.title}' (ID ${huntId}). It is not the currently active hunt.` 
-      };
+  private ensureHuntIsActive(progress: HuntProgress, hunt: Hunt): void {
+    if (progress.currentActiveHunt !== hunt.id) {
+      throw new Error(`HuntService: Cannot complete Hunt '${hunt.title}' (ID ${hunt.id}). It is not the currently active hunt.`);
     }
+  }
 
-    if (hunt.isCompleted) {
-      return { 
-        isValid: false, 
-        error: `HuntService: Hunt '${hunt.title}' (ID ${huntId}) is already completed.` 
-      };
-    }
-
+  private ensureHuntHasStartTime(hunt: Hunt): void {
     if (!hunt.startTime) {
-      return { 
-        isValid: false, 
-        error: `HuntService: Cannot complete Hunt '${hunt.title}' (ID ${huntId}). Start time is missing.` 
-      };
+      throw new Error(`HuntService: Cannot complete Hunt '${hunt.title}' (ID ${hunt.id}). Start time is missing.`);
     }
-
-    return { isValid: true, hunt };
   }
 
   private unlockNextHunt(progress: HuntProgress, huntId: number): void {
@@ -211,14 +194,7 @@ export class HuntService {
   }
   private getInitialProgress(): HuntProgress {
     return {
-      hunts: [
-        { id: 1, title: 'First Discovery', description: 'Find your first clue', isCompleted: false, isUnlocked: true, maxDuration: 300 }, // 5 minutes
-        { id: 2, title: 'Hidden Path', description: 'Follow the hidden trail', isCompleted: false, isUnlocked: false, maxDuration: 450 }, // 7.5 minutes
-        { id: 3, title: 'Secret Location', description: 'Discover the secret spot', isCompleted: false, isUnlocked: false, maxDuration: 600 }, // 10 minutes
-        { id: 4, title: 'Ancient Marker', description: 'Find the ancient marker', isCompleted: false, isUnlocked: false, maxDuration: 360 }, // 6 minutes
-        { id: 5, title: 'Final Treasure', description: 'Locate the final treasure', isCompleted: false, isUnlocked: false, maxDuration: 540 }, // 9 minutes
-        { id: 6, title: 'Ultimate Prize', description: 'Claim your ultimate prize', isCompleted: false, isUnlocked: false, maxDuration: 420 } // 7 minutes
-      ],
+      hunts: JSON.parse(JSON.stringify(INITIAL_HUNTS)), // Deep copy to avoid modifying the original data
       totalCompleted: 0
     };
   }
