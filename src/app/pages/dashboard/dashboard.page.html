@@ -41,8 +41,13 @@
 
   <!-- Animated Action Button -->
   <app-animated-action-button
+    [availableStates]="dashboardActionButtonConfig.availableStates"
+    [handlers]="dashboardActionButtonConfig.handlers"
+    [stateConfig]="dashboardActionButtonConfig.stateConfig"
+    [getState]="dashboardActionButtonConfig.getCurrentState"
+    [isVisible]="dashboardActionButtonConfig.isVisible"
     position="bottom-start"
-    (actionPerformed)="onActionPerformed($event)"
+    size="small"
   >
   </app-animated-action-button>
 </ion-content>

@@ -5,17 +5,23 @@ import {
   EventEmitter,
   OnInit,
   OnDestroy,
+  OnChanges,
+  SimpleChanges,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router'; // Added Router
-import { Subject, takeUntil } from 'rxjs';
-import { HuntService } from '../../../services/hunt.service';
-import { AlertService } from '../../../services/alert.service';
-import { TimerService } from '../../../services/timer.service';
-import { Hunt, HuntProgress } from '../../../models/hunt.model';
+import { Subject, takeUntil, interval } from 'rxjs';
 import { IONIC_COMPONENTS } from '../../utils/ionic.utils';
 
-export type ButtonState = 'reset' | 'skip' | 'complete';
+export interface ActionButtonConfig {
+  icon: string;
+  color: string;
+  label?: string;
+  position?: 'start' | 'end';
+}
+
+export interface ActionButtonState {
+  [stateName: string]: ActionButtonConfig;
+}
 
 @Component({
   selector: 'app-animated-action-button',
@@ -23,182 +29,184 @@ export type ButtonState = 'reset' | 'skip' | 'complete';
   styleUrls: ['./animated-action-button.component.scss'],
   imports: [CommonModule, ...IONIC_COMPONENTS],
 })
-export class AnimatedActionButtonComponent implements OnInit, OnDestroy {
+export class AnimatedActionButtonComponent
+  implements OnInit, OnDestroy, OnChanges
+{
+  @Input() availableStates: string[] = [];
+  @Input() getState?: () => string;
+  @Input() handlers: Record<string, () => void | Promise<void>> = {};
+  @Input() stateConfig: ActionButtonState = {};
   @Input() position: 'bottom-start' | 'bottom-end' = 'bottom-start';
-  @Output() actionPerformed = new EventEmitter<ButtonState>();
-  currentState: ButtonState = 'reset';
-  currentHunt?: Hunt;
-  isVisible = true; // Keep this to control visibility
+  @Input() isVisible?: boolean | (() => boolean) = true;
+  @Input() updateInterval?: number; // milliseconds, for periodic state updates
+  @Input() size: 'small' | 'default' | 'large' = 'small';
 
+  @Output() actionPerformed = new EventEmitter<string>();
+
+  currentState: string = '';
   private destroy$ = new Subject<void>();
-  constructor(
-    private huntService: HuntService,
-    private alertService: AlertService,
-    private timerService: TimerService,
-    private router: Router // Injected Router
-  ) {}
-  ngOnInit(): void {
-    // Subscribe to hunt progress to determine button state
-    this.huntService.progress$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((progress: HuntProgress) => {
-        this.updateButtonState(progress);
-      });
+  private updateTimer$ = new Subject<void>();
 
-    // Subscribe to timer updates for real-time button state changes
-    this.timerService.timer$.pipe(takeUntil(this.destroy$)).subscribe(() => {
-      // Update button state when timer changes
-      this.updateButtonState(this.huntService.currentProgress);
-    });
+  constructor() {}
+
+  ngOnInit(): void {
+    this.initializeState();
+    this.setupPeriodicUpdates();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['availableStates'] || changes['getState']) {
+      this.updateCurrentState();
+    }
   }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    this.updateTimer$.next();
+    this.updateTimer$.complete();
   }
-  private updateButtonState(progress: HuntProgress): void {
-    const previousState = this.currentState;
-    const currentUrl = this.router.url;
 
-    // Determine page type first
-    const isOnDashboard = currentUrl.startsWith('/dashboard');
-    const isOnHuntPage = currentUrl.startsWith('/hunt');
+  private initializeState(): void {
+    this.updateCurrentState();
+  }
 
-    // Default to hidden
-    this.isVisible = false;
-    this.currentHunt = undefined;
+  private setupPeriodicUpdates(): void {
+    if (this.updateInterval && this.updateInterval > 0) {
+      interval(this.updateInterval)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(() => {
+          this.updateCurrentState();
+        });
+    }
+  }
 
-    if (isOnDashboard) {
-      // Dashboard: ONLY show reset button (never skip/complete)
-      this.currentState = 'reset';
-      this.isVisible = true;
-      this.currentHunt = undefined; // Reset is not tied to a specific hunt
-    } else if (isOnHuntPage && progress.currentActiveHunt) {
-      // Hunt pages: Show button as long as hunt is not completed and not skipped
-      const activeHunt = progress.hunts.find(
-        h => h.id === progress.currentActiveHunt
-      );
-      if (activeHunt && !activeHunt.isCompleted && !activeHunt.isSkipped) {
-        this.currentHunt = activeHunt;
-        this.isVisible = true;
-
-        if (this.isHuntReadyToComplete(activeHunt)) {
-          this.currentState = 'complete';
-        } else {
-          this.currentState = 'skip';
-        }
+  private updateCurrentState(): void {
+    if (this.getState && this.availableStates.length > 0) {
+      const newState = this.getState();
+      if (this.availableStates.includes(newState)) {
+        this.currentState = newState;
+      } else if (this.availableStates.length > 0) {
+        // Fallback to first available state if current state is not available
+        this.currentState = this.availableStates[0];
+      }
+    } else if (this.availableStates.length > 0) {
+      // No getState function, use first available state
+      this.currentState = this.availableStates[0];
+    }
+  }
+  async onButtonClick(): Promise<void> {
+    if (this.currentState && this.handlers[this.currentState]) {
+      try {
+        await this.handlers[this.currentState]();
+        this.actionPerformed.emit(this.currentState);
+      } catch (error) {
+        console.error(
+          `Error executing handler for state '${this.currentState}':`,
+          error
+        );
       }
     }
-    // For all other cases (other pages, or hunt pages without active hunt), button stays hidden
-
-    if (previousState !== this.currentState) {
-      // State changed - position will update automatically via template
-    }
-  }
-
-  private isHuntReadyToComplete(hunt: Hunt): boolean {
-    // Check if hunt has started
-    if (!hunt.startTime) return false;
-
-    // Use timer service to get current elapsed time for accurate timing
-    const currentElapsedTime = this.timerService.currentElapsedTime;
-
-    // If hunt has a maximum duration, check if it's reached or exceeded
-    if (hunt.maxDuration && hunt.maxDuration > 0) {
-      // Allow completion when 80% of max duration is reached or duration is exceeded
-      const threshold = Math.floor(hunt.maxDuration * 0.8);
-      return currentElapsedTime >= threshold;
-    }
-
-    // Fallback: ready to complete after 5 seconds if no max duration is set
-    return currentElapsedTime > 5;
-  }
-
-  async onButtonClick(): Promise<void> {
-    switch (this.currentState) {
-      case 'reset':
-        await this.handleReset();
-        break;
-      case 'skip':
-        await this.handleSkip();
-        break;
-      case 'complete':
-        await this.handleComplete();
-        break;
-    }
-  }
-
-  private async handleReset(): Promise<void> {
-    const shouldReset = await this.alertService.showResetProgressAlert();
-    if (shouldReset) {
-      this.huntService.resetUserProgress();
-      this.actionPerformed.emit('reset');
-    }
-  }
-
-  private async handleSkip(): Promise<void> {
-    if (!this.currentHunt) {
-      return;
-    }
-
-    const shouldSkip = await this.alertService.showSkipHuntAlert(
-      this.currentHunt.title
-    );
-
-    if (shouldSkip) {
-      this.huntService.skipHunt(this.currentHunt.id);
-      this.actionPerformed.emit('skip');
-      // Remove navigation - hunt-page helper will handle redirection
-    }
-  }
-
-  private async handleComplete(): Promise<void> {
-    if (!this.currentHunt) return;
-
-    this.huntService.completeHunt(this.currentHunt.id);
-    this.actionPerformed.emit('complete');
   }
 
   getButtonColor(): string {
-    switch (this.currentState) {
-      case 'reset':
-        return 'danger';
-      case 'skip':
-        return 'warning';
-      case 'complete':
-        return 'success';
-      default:
-        return 'primary';
-    }
+    const config = this.stateConfig[this.currentState];
+    return config?.color || 'primary';
   }
 
   getButtonIcon(): string {
-    switch (this.currentState) {
-      case 'reset':
-        return 'trash-bin';
-      case 'skip':
-        return 'play-skip-forward';
-      case 'complete':
-        return 'checkmark';
-      default:
-        return 'help';
-    }
+    const config = this.stateConfig[this.currentState];
+    return config?.icon || 'help';
   }
+
+  getButtonLabel(): string | undefined {
+    const config = this.stateConfig[this.currentState];
+    return config?.label;
+  }
+
   getButtonClass(): string {
     const dynamicPosition = this.getDynamicPosition();
     return `action-button action-button-${this.currentState} position-${dynamicPosition}`;
   }
 
   private getDynamicPosition(): string {
-    // Reset button stays on the left, skip and complete go to the right
-    switch (this.currentState) {
-      case 'reset':
-        return 'bottom-start'; // Left side
-      case 'skip':
-      case 'complete':
-        return 'bottom-end'; // Right side
-      default:
-        return this.position; // Fallback to input position
+    const config = this.stateConfig[this.currentState];
+    if (config?.position) {
+      return config.position;
     }
+
+    // Fallback to input position or default logic
+    return this.position === 'bottom-start' ? 'start' : 'end';
   }
+
+  getHorizontalPosition(): 'start' | 'end' {
+    const config = this.stateConfig[this.currentState];
+    if (config?.position) {
+      return config.position;
+    }
+
+    // Default positioning logic
+    return this.position === 'bottom-start' ? 'start' : 'end';
+  }
+
+  get isButtonVisible(): boolean {
+    if (typeof this.isVisible === 'function') {
+      return this.isVisible();
+    }
+
+    return (
+      this.isVisible !== false &&
+      this.currentState !== '' &&
+      this.availableStates.length > 0
+    );
+  }
+
+  // Default state configurations for common use cases
+  static readonly DEFAULT_STATES: ActionButtonState = {
+    reset: {
+      icon: 'trash-bin',
+      color: 'danger',
+      position: 'start',
+    },
+    skip: {
+      icon: 'play-skip-forward',
+      color: 'warning',
+      position: 'end',
+    },
+    complete: {
+      icon: 'checkmark-circle',
+      color: 'success',
+      position: 'end',
+    },
+    submit: {
+      icon: 'send',
+      color: 'primary',
+      position: 'end',
+    },
+    delete: {
+      icon: 'trash',
+      color: 'danger',
+      position: 'start',
+    },
+    confirm: {
+      icon: 'checkmark',
+      color: 'success',
+      position: 'end',
+    },
+    cancel: {
+      icon: 'close',
+      color: 'medium',
+      position: 'start',
+    },
+    edit: {
+      icon: 'create',
+      color: 'primary',
+      position: 'end',
+    },
+    save: {
+      icon: 'save',
+      color: 'success',
+      position: 'end',
+    },
+  };
 }

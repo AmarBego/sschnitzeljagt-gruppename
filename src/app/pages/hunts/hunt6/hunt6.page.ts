@@ -1,21 +1,14 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import {
-  IonContent,
-  IonHeader,
-  IonTitle,
-  IonToolbar,
-} from '@ionic/angular/standalone';
-import {
-  AnimatedActionButtonComponent,
-  ButtonState,
-} from '../../../shared/components/animated-action-button/animated-action-button.component';
+import { IONIC_COMPONENTS } from '../../../shared/utils/ionic.utils';
+import { AnimatedActionButtonComponent } from '../../../shared/components/animated-action-button/animated-action-button.component';
 import { HuntTimerComponent } from '../../../shared/components/hunt-timer/hunt-timer.component';
 import {
-  HuntPageHelper,
   HuntPageData,
+  HuntPageHelper,
 } from '../../../shared/utils/hunt-page.helper';
+import { BaseHuntPage } from '../../../shared/utils/base-hunt.page';
 
 @Component({
   selector: 'app-hunt6',
@@ -23,10 +16,7 @@ import {
   styleUrls: ['./hunt6.page.scss'],
   standalone: true,
   imports: [
-    IonContent,
-    IonHeader,
-    IonTitle,
-    IonToolbar,
+    ...IONIC_COMPONENTS,
     CommonModule,
     FormsModule,
     AnimatedActionButtonComponent,
@@ -34,29 +24,8 @@ import {
   ],
   providers: [HuntPageHelper],
 })
-export class Hunt6Page implements OnInit, OnDestroy {
-  huntData: HuntPageData = {
-    timer: 0,
-    isHuntActive: false,
-  };
-
-  constructor(private huntHelper: HuntPageHelper) {}
-
-  ngOnInit() {
-    this.huntHelper.initializeForHunt(6, data => {
-      this.huntData = data;
-    });
-  }
-
-  ngOnDestroy() {
-    this.huntHelper.ngOnDestroy();
-  }
-
-  onActionPerformed(action: ButtonState): void {
-    this.huntHelper.onActionPerformed(action);
-  }
-
-  get isOverdue(): boolean {
-    return this.huntHelper.isHuntOverdue(this.huntData.currentHunt);
+export class Hunt6Page extends BaseHuntPage {
+  override get huntId(): number {
+    return 6;
   }
 }

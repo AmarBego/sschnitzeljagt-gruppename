@@ -8,10 +8,7 @@ import { ModalService } from '../../services/modal.service';
 import { Hunt, HuntProgress } from '../../models/hunt.model';
 import { IONIC_COMPONENTS } from '../../shared/utils/ionic.utils';
 import { HuntNavigationService } from '../../services/hunt-navigation.service'; // Added import
-import {
-  AnimatedActionButtonComponent,
-  ButtonState,
-} from '../../shared/components/animated-action-button/animated-action-button.component';
+import { AnimatedActionButtonComponent } from '../../shared/components/animated-action-button/animated-action-button.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -48,6 +45,8 @@ export class DashboardPage implements OnInit, OnDestroy {
         this.hunts = progress.hunts;
         this.currentActiveHunt = progress.currentActiveHunt;
       });
+
+    this.loadInitialData();
   }
 
   ngOnDestroy(): void {
@@ -90,11 +89,6 @@ export class DashboardPage implements OnInit, OnDestroy {
     return hunt.title;
   }
 
-  onActionPerformed(action: ButtonState): void {
-    // Handle any additional logic when button actions are performed
-    console.log(`Action performed: ${action}`);
-  }
-
   async onSkipHunt(hunt: Hunt): Promise<void> {
     const shouldSkip = await this.alertService.showSkipHuntAlert(hunt.title);
     if (shouldSkip) {
@@ -104,5 +98,41 @@ export class DashboardPage implements OnInit, OnDestroy {
 
   async onHelpClick(): Promise<void> {
     await this.modalService.showHelpModal();
+  }
+
+  // Dashboard action button configuration
+  get dashboardActionButtonConfig() {
+    return {
+      availableStates: ['reset'],
+      handlers: {
+        reset: async () => {
+          await this.onResetProgress();
+        },
+      },
+      stateConfig: AnimatedActionButtonComponent.DEFAULT_STATES,
+      getCurrentState: () => 'reset',
+      isVisible: () =>
+        this.hunts.some(
+          hunt => hunt.isCompleted || hunt.isSkipped || hunt.startTime
+        ),
+    };
+  }
+
+  async onResetProgress(): Promise<void> {
+    const shouldReset = await this.alertService.showResetProgressAlert();
+
+    if (shouldReset) {
+      try {
+        await this.huntService.resetProgress();
+      } catch (error) {
+        await this.alertService.showErrorAlert(
+          'Failed to reset progress. Please try again.'
+        );
+      }
+    }
+  }
+
+  private loadInitialData(): void {
+    // Implementation of loadInitialData method
   }
 }

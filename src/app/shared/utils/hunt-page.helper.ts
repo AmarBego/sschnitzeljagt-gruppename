@@ -4,12 +4,23 @@ import { Subject, takeUntil } from 'rxjs';
 import { HuntService } from '../../services/hunt.service';
 import { TimerService } from '../../services/timer.service';
 import { Hunt, HuntProgress } from '../../models/hunt.model';
-import { ButtonState } from '../components/animated-action-button/animated-action-button.component';
+import {
+  ActionButtonState,
+  AnimatedActionButtonComponent,
+} from '../components/animated-action-button/animated-action-button.component';
 
 export interface HuntPageData {
   currentHunt?: Hunt;
   timer: number;
   isHuntActive: boolean;
+}
+
+export interface HuntActionButtonConfig {
+  availableStates: string[];
+  handlers: Record<string, () => void | Promise<void>>;
+  stateConfig: ActionButtonState;
+  getCurrentState: () => string;
+  isVisible: () => boolean;
 }
 
 @Injectable()
@@ -53,29 +64,89 @@ export class HuntPageHelper implements OnDestroy {
     callback: (data: HuntPageData) => void
   ): void {
     const hunt = progress.hunts.find(h => h.id === this.currentHuntId);
-    const isActiveHunt = progress.currentActiveHunt === this.currentHuntId; // Check if hunt is skipped or completed and redirect to dashboard
+
+    // Check if hunt is skipped or completed and redirect to dashboard
     if (hunt && (hunt.isSkipped || hunt.isCompleted)) {
       this.router.navigate(['/dashboard']);
       return;
     }
 
+    let isActuallyActive = false;
+    if (hunt) {
+      // If hunt exists and is not skipped/completed (due to the check above),
+      // it's active if it's the current one in progress and has a start time.
+      const isCurrentByProgress =
+        progress.currentActiveHunt === this.currentHuntId;
+      isActuallyActive = isCurrentByProgress && !!hunt.startTime;
+    }
+    // If hunt is undefined (not found), isActuallyActive remains false.
+
     this.huntPageData = {
-      currentHunt: hunt,
+      currentHunt: hunt, // hunt itself can be undefined if not found
       timer: this.huntPageData.timer, // Keep existing timer value
-      isHuntActive:
-        isActiveHunt &&
-        !!hunt?.startTime &&
-        !hunt.isCompleted &&
-        !hunt.isSkipped,
+      isHuntActive: isActuallyActive,
     };
 
     callback(this.huntPageData);
   }
-  // ndle action performed by the animated action button
 
-  onActionPerformed(action: ButtonState): void {
-    // The animated action button component already handles the core logic
-    // This method can be extended for hunt-specific actions if needed
+  private get isCurrentHuntActiveAndModifiable(): boolean {
+    const hunt = this.huntPageData.currentHunt;
+    if (!hunt) {
+      return false;
+    }
+    // A hunt is considered active and modifiable if it's the active hunt,
+    // and it's not completed or skipped.
+    return (
+      this.huntPageData.isHuntActive && !hunt.isCompleted && !hunt.isSkipped
+    );
+  }
+
+  // Get all action button configuration in one consolidated getter
+  get actionButtonConfiguration(): HuntActionButtonConfig {
+    return {
+      availableStates: (() => {
+        const hunt = this.huntPageData.currentHunt;
+        if (!hunt || !hunt.isUnlocked) return [];
+        const states: string[] = [];
+        if (this.isCurrentHuntActiveAndModifiable) {
+          states.push('skip');
+          states.push('complete');
+        }
+        return states;
+      })(),
+      handlers: {
+        skip: async () => {
+          if (this.currentHuntId) {
+            await this.huntService.skipHunt(this.currentHuntId);
+          }
+        },
+        complete: async () => {
+          if (this.currentHuntId) {
+            await this.huntService.completeHunt(this.currentHuntId);
+          }
+        },
+      },
+      stateConfig: AnimatedActionButtonComponent.DEFAULT_STATES,
+      getCurrentState: () => {
+        const hunt = this.huntPageData.currentHunt;
+        if (!hunt || !hunt.isUnlocked) return '';
+        if (this.isCurrentHuntActiveAndModifiable) {
+          if (this.isHuntOverdue(hunt)) {
+            return 'complete';
+          }
+          return 'skip';
+        }
+        return '';
+      },
+      isVisible: () => {
+        const hunt = this.huntPageData.currentHunt;
+        if (!hunt || !hunt.isUnlocked) {
+          return false;
+        }
+        return this.isCurrentHuntActiveAndModifiable;
+      },
+    };
   }
 
   // Format timer display

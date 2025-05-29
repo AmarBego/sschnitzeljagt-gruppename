@@ -26,6 +26,14 @@
     </p>
   </div>
 
-  <app-animated-action-button (actionPerformed)="onActionPerformed($event)">
+  <app-animated-action-button
+    [availableStates]="actionButtonConfig.availableStates"
+    [getState]="actionButtonConfig.getCurrentState"
+    [handlers]="actionButtonConfig.handlers"
+    [stateConfig]="actionButtonConfig.stateConfig"
+    [isVisible]="actionButtonConfig.isVisible"
+    position="bottom-end"
+    size="default"
+  >
   </app-animated-action-button>
 </ion-content>
