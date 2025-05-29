@@ -5,7 +5,7 @@ import { HuntService } from '../../../services/hunt.service';
 import { AlertService } from '../../../services/alert.service';
 import { TimerService } from '../../../services/timer.service';
 import { Hunt, HuntProgress } from '../../../models/hunt.model';
-import { IONIC_COMPONENTS } from '../../ionic.utils';
+import { IONIC_COMPONENTS } from '../../utils/ionic.utils';
 
 export type ButtonState = 'reset' | 'skip' | 'complete';
 

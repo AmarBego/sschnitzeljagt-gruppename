@@ -6,7 +6,7 @@ import { HuntService } from '../../services/hunt.service';
 import { AlertService } from '../../services/alert.service';
 import { ModalService } from '../../services/modal.service';
 import { Hunt, HuntProgress } from '../../models/hunt.model';
-import { IONIC_COMPONENTS } from '../../shared/ionic.utils';
+import { IONIC_COMPONENTS } from '../../shared/utils/ionic.utils';
 import { AnimatedActionButtonComponent, ButtonState } from '../../shared/components/animated-action-button/animated-action-button.component';
 
 @Component({

@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ModalController } from '@ionic/angular/standalone';
-import { IONIC_COMPONENTS } from '../../ionic.utils';
+import { IONIC_COMPONENTS } from '../../utils/ionic.utils';
 
 @Component({
   selector: 'app-help-modal',
