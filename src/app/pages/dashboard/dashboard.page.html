@@ -1,0 +1,38 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Yapp - Dashboard</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Yapp</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <div class="dashboard-container">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Welcome, {{ userName }}!</ion-card-title>
+        <ion-card-subtitle>Bounty Hunt GPS Tracker</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <p>Your GPS tracker and QR code scanner are ready to use.</p>
+        <p>Location services: {{ locationStatus }}</p>
+      </ion-card-content>
+    </ion-card>
+
+    <div class="action-buttons">
+      <ion-button expand="block" fill="solid" color="primary">
+        <ion-icon name="location-outline" slot="start"></ion-icon>
+        Track Location
+      </ion-button>
+      
+      <ion-button expand="block" fill="outline" color="secondary">
+        <ion-icon name="qr-code-outline" slot="start"></ion-icon>
+        Scan QR Code
+      </ion-button>
+    </div>
+  </div>
+</ion-content>
