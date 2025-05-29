@@ -14,7 +14,7 @@ export class HuntAppEventsService {
   private readonly huntOrchestrationService = inject(HuntOrchestrationService);
   private readonly timerService = inject(TimerService);
 
-  private readonly ABANDONMENT_THRESHOLD = 3000; // 3 seconds
+  private readonly ABANDONMENT_THRESHOLD = 30000; // 30 seconds
 
   constructor() {
     // Initial check when service is constructed (app starts)

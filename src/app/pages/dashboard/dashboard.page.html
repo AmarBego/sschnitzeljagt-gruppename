@@ -24,7 +24,7 @@
         <div class="hunt-item">
           <ion-button
             fill="outline"
-            [disabled]="!hunt.isUnlocked || hunt.isSkipped"
+            [disabled]="!hunt.isUnlocked || hunt.isCompleted"
             (click)="onHuntClick(hunt)"
             class="hunt-button"
             [attr.data-status]="getHuntStatus(hunt)"

@@ -78,6 +78,7 @@ export class DashboardPage implements OnInit, OnDestroy {
   getHuntStatus(hunt: Hunt): string {
     if (!hunt.isUnlocked) return 'locked';
     if (hunt.isCompleted && hunt.isLateCompletion) return 'late';
+    if (hunt.isCompleted && hunt.isSkipped) return 'skipped';
     if (hunt.isCompleted) return 'completed';
     if (hunt.isSkipped) return 'skipped';
     if (hunt.startTime && !hunt.isCompleted) return 'started';

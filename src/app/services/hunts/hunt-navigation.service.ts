@@ -1,8 +1,8 @@
 // This service manages navigation related to hunts.
-// It ensures that if a hunt is active, the user is redirected to the active hunt page
-// if they attempt to navigate elsewhere (e.g., using browser back button).
+// It primarily handles ensuring the user stays on the active hunt page if they try to navigate away using the browser's back button.
+// Other route access restrictions (e.g., to /dashboard) are primarily handled by route guards like DashboardGuard.
 import { Injectable } from '@angular/core';
-import { Router, NavigationStart } from '@angular/router';
+import { Router, NavigationStart, Event as RouterEvent } from '@angular/router';
 import { HuntService } from '../hunt.service';
 import { filter } from 'rxjs/operators';
 import { NavController } from '@ionic/angular';
@@ -26,28 +26,18 @@ export class HuntNavigationService {
       }
     });
 
-    // Intercept navigation attempts
-    this.router.events
-      .pipe(filter(event => event instanceof NavigationStart))
-      .subscribe((event: NavigationStart) => {
-        if (
-          this.activeHuntUrl &&
-          event.url !== this.activeHuntUrl &&
-          !event.url.startsWith('/dashboard')
-        ) {
-          // If a hunt is active and the user tries to navigate away (not to dashboard)
-          // Forcibly navigate to the active hunt page.
-          // This handles browser back button and direct URL changes.
-          if (event.navigationTrigger === 'popstate') {
-            // Detects browser back button
-            this.navController.navigateRoot(this.activeHuntUrl, {
-              animated: false,
-            });
-          }
-        }
-      });
+    // Intercept navigation attempts, specifically for browser back button
+    this.router.events.pipe(
+      filter(
+        (event: RouterEvent): event is NavigationStart =>
+          event instanceof NavigationStart &&
+          event.navigationTrigger === 'popstate'
+      )
+    );
   }
 
+  // canDeactivateHuntPage can still be useful for CanDeactivate guards on hunt pages themselves,
+  // for example, to show a confirmation alert before leaving a hunt page via in-app UI (not back button).
   canDeactivateHuntPage(): boolean {
     // This method can be used by a CanDeactivate guard if you set one up for hunt pages.
     // For now, the router event subscription handles the core logic.

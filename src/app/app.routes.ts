@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { DashboardGuard } from './guards/dashboard.guard';
 
 export const routes: Routes = [
   {
@@ -9,6 +10,7 @@ export const routes: Routes = [
     path: 'dashboard',
     loadComponent: () =>
       import('./pages/dashboard/dashboard.page').then(m => m.DashboardPage),
+    canActivate: [DashboardGuard],
   },
   {
     path: '',

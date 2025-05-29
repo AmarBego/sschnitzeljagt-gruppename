@@ -87,6 +87,7 @@ export class HuntOrchestrationService {
     }
 
     hunt.isSkipped = true;
+    hunt.isCompleted = true;
     hunt.completionTime = new Date(); // Record skip time
     hunt.duration = hunt.startTime
       ? Math.floor(
