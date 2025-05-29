@@ -48,6 +48,27 @@ export class UserService {
     }
   }
 
+  getUserStorageKey(suffix: string): string {
+    const user = this.currentUser;
+    if (!user?.name) {
+      return suffix; // Fallback for users without names
+    }
+    return `${user.name.toLowerCase().replace(/\s+/g, '_')}_${suffix}`;
+  }
+
+  clearUserData(): void {
+    const user = this.currentUser;
+    if (user?.name) {
+      // Clear user-specific hunt progress
+      const huntProgressKey = this.getUserStorageKey('hunt_progress');
+      localStorage.removeItem(huntProgressKey);
+    }
+    
+    // Clear user profile
+    localStorage.removeItem(this.STORAGE_KEY);
+    this.userSubject.next(null);
+  }
+
   private loadUser(): void {
     const stored = localStorage.getItem(this.STORAGE_KEY);
     if (stored) {

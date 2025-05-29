@@ -3,8 +3,8 @@
 }
 
 .hunt-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  display: flex;
+  flex-direction: column;
   gap: 12px;
   margin-top: 16px;
 }
@@ -33,6 +33,32 @@
   }
 }
 
+// Hunt button styling
+.hunt-button {
+  // Available hunt button styling (unlocked but not started/completed)
+  &[color="light"][fill="outline"] {
+    --border-color: #ffffff !important;
+    --border-style: solid;
+    --border-width: 2px;
+    --color: #ffffff;
+    border: 2px solid #ffffff !important;
+    border-radius: 10px;;
+    
+    &:hover {
+      --border-color: #f5f5f5 !important;
+      --color: #f5f5f5;
+      border-color: #f5f5f5 !important;
+    }
+    
+    .hunt-content {
+      .hunt-number,
+      .hunt-title {
+        color: #ffffff;
+      }
+    }
+  }
+}
+
 .timer-display {
   font-family: 'Courier New', monospace;
   font-size: 16px;
@@ -48,7 +74,6 @@ ion-toolbar {
 // Responsive design for larger screens
 @media (min-width: 768px) {
   .hunt-grid {
-    grid-template-columns: repeat(3, 1fr);
     gap: 16px;
   }
   
@@ -59,6 +84,28 @@ ion-toolbar {
       .hunt-title {
         font-size: 14px;
       }
+    }
+  }
+}
+
+// Floating reset button styling
+ion-fab {
+  ion-fab-button {
+    --background: rgba(255, 69, 58, 0.9);
+    --background-activated: rgba(255, 69, 58, 1);
+    --color: white;
+    --box-shadow: 0 4px 16px rgba(255, 69, 58, 0.3);
+    --border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    
+    &:hover {
+      --background: rgba(255, 69, 58, 1);
+      --box-shadow: 0 6px 20px rgba(255, 69, 58, 0.4);
+    }
+    
+    ion-icon {
+      font-size: 20px;
     }
   }
 }

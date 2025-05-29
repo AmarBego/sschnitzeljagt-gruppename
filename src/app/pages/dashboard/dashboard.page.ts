@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Subject, takeUntil } from 'rxjs';
 import { UserService } from '../../services/user.service';
 import { HuntService } from '../../services/hunt.service';
+import { AlertService } from '../../services/alert.service';
 import { Hunt, HuntProgress } from '../../models/hunt.model';
 import { IONIC_COMPONENTS } from '../../shared/ionic.utils';
 
@@ -18,19 +19,30 @@ import { IONIC_COMPONENTS } from '../../shared/ionic.utils';
 export class DashboardPage implements OnInit, OnDestroy {
   hunts: Hunt[] = [];
   currentTimer = 0;
+  currentActiveHunt?: number;
   
   private destroy$ = new Subject<void>();
 
   constructor(
     private userService: UserService,
-    private huntService: HuntService
+    private huntService: HuntService,
+    private alertService: AlertService
   ) {}
 
   ngOnInit(): void {
-    this.huntService.progress$
+    // Subscribe to user changes to reload user-specific progress
+    this.userService.user$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(user => {
+        if (user) {
+          // User logged in or changed, reload their progress
+          this.huntService.reloadUserProgress();
+        }
+      });    this.huntService.progress$
       .pipe(takeUntil(this.destroy$))
       .subscribe((progress: HuntProgress) => {
         this.hunts = progress.hunts;
+        this.currentActiveHunt = progress.currentActiveHunt;
       });
 
     this.huntService.timer$
@@ -58,18 +70,18 @@ export class DashboardPage implements OnInit, OnDestroy {
       // In real app, this would be triggered by reaching location/scanning QR
       this.huntService.completeHunt(hunt.id);
     }
-  }
-
-  getHuntButtonColor(hunt: Hunt): string {
+  }  getHuntButtonColor(hunt: Hunt): string {
     if (hunt.isCompleted) return 'success';
     if (!hunt.isUnlocked) return 'medium';
-    return 'primary';
+    if (this.currentActiveHunt === hunt.id) return 'warning';
+    return 'light';
   }
 
   getHuntButtonFill(hunt: Hunt): string {
     if (hunt.isCompleted) return 'solid';
     if (!hunt.isUnlocked) return 'outline';
-    return 'solid';
+    if (this.currentActiveHunt === hunt.id) return 'solid';
+    return 'outline';
   }
 
   getHuntDisplayTitle(hunt: Hunt): string {
@@ -81,5 +93,11 @@ export class DashboardPage implements OnInit, OnDestroy {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  }
+  async onResetClick(): Promise<void> {
+    const shouldReset = await this.alertService.showResetProgressAlert();
+    if (shouldReset) {
+      this.huntService.resetUserProgress();
+    }
   }
 }

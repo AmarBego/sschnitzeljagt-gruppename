@@ -107,4 +107,28 @@ export class AlertService {
 
     await alert.present();
   }
+
+  async showResetProgressAlert(): Promise<boolean> {
+    return new Promise(async (resolve) => {
+      const alert = await this.alertController.create({
+        header: 'Reset Progress',
+        message: 'This will reset your entire hunt progress and delete all current data. This action cannot be undone.',
+        buttons: [
+          {
+            text: 'Cancel',
+            role: 'cancel',
+            handler: () => resolve(false)
+          },
+          {
+            text: 'Reset',
+            role: 'destructive',
+            handler: () => resolve(true)
+          }
+        ],
+        backdropDismiss: false
+      });
+
+      await alert.present();
+    });
+  }
 }

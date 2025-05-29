@@ -1,9 +1,10 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
+<ion-header [translucent]="true">  <ion-toolbar>
     <ion-title>Yapp</ion-title>
-    <div slot="end" class="timer-display" *ngIf="currentTimer > 0">
-      {{ formatTime(currentTimer) }}
-    </div>
+    @if (currentTimer > 0) {
+      <div slot="end" class="timer-display">
+        {{ formatTime(currentTimer) }}
+      </div>
+    }
   </ion-toolbar>
 </ion-header>
 
@@ -13,21 +14,28 @@
       <ion-title size="large">Yapp</ion-title>
     </ion-toolbar>
   </ion-header>
-
   <div class="dashboard-container">
     <div class="hunt-grid">
-      <ion-button
-        *ngFor="let hunt of hunts"
-        [color]="getHuntButtonColor(hunt)"
-        [fill]="getHuntButtonFill(hunt)"
-        [disabled]="!hunt.isUnlocked"
-        (click)="onHuntClick(hunt)"
-        class="hunt-button">
-        <div class="hunt-content">
-          <div class="hunt-number">{{ hunt.id }}</div>
-          <div class="hunt-title">{{ getHuntDisplayTitle(hunt) }}</div>
-        </div>
-      </ion-button>
+      @for (hunt of hunts; track hunt.id) {
+        <ion-button
+          [color]="getHuntButtonColor(hunt)"
+          [fill]="getHuntButtonFill(hunt)"
+          [disabled]="!hunt.isUnlocked"
+          (click)="onHuntClick(hunt)"
+          class="hunt-button">
+          <div class="hunt-content">
+            <div class="hunt-number">{{ hunt.id }}</div>
+            <div class="hunt-title">{{ getHuntDisplayTitle(hunt) }}</div>
+          </div>
+        </ion-button>
+      }
     </div>
   </div>
+
+  <!-- Floating Reset Button -->
+  <ion-fab vertical="bottom" horizontal="start" slot="fixed">
+    <ion-fab-button color="danger" size="small" (click)="onResetClick()">
+      <ion-icon name="refresh"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
 </ion-content>

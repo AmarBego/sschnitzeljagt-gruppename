@@ -1,18 +1,19 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, interval, Subscription } from 'rxjs';
 import { Hunt, HuntProgress } from '../models/hunt.model';
+import { UserService } from './user.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class HuntService {
-  private readonly STORAGE_KEY = 'yapp_hunt_progress';
+  private readonly STORAGE_KEY = 'hunt_progress';
   private progressSubject = new BehaviorSubject<HuntProgress>(this.getInitialProgress());
   private timerSubject = new BehaviorSubject<number>(0);
   private timerSubscription?: Subscription;
   private activeHuntStartTime?: Date;
 
-  constructor() {
+  constructor(private userService: UserService) {
     this.loadProgress();
   }
 
@@ -80,6 +81,25 @@ export class HuntService {
     this.stopTimer();
   }
 
+  resetUserProgress(): void {
+    // Reset hunt progress
+    const initialProgress = this.getInitialProgress();
+    this.updateProgress(initialProgress);
+    this.stopTimer();
+    
+    // Clear user-specific data
+    this.userService.clearUserData();
+  }
+
+  reloadUserProgress(): void {
+    // Reset to initial state first
+    this.progressSubject.next(this.getInitialProgress());
+    this.stopTimer();
+    
+    // Then load user-specific progress
+    this.loadProgress();
+  }
+
   private startTimer(): void {
     this.stopTimer();
     this.timerSubscription = interval(1000).subscribe(() => {
@@ -112,14 +132,14 @@ export class HuntService {
       totalCompleted: 0
     };
   }
-
   private updateProgress(progress: HuntProgress): void {
-    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(progress));
+    const storageKey = this.userService.getUserStorageKey(this.STORAGE_KEY);
+    localStorage.setItem(storageKey, JSON.stringify(progress));
     this.progressSubject.next(progress);
   }
-
   private loadProgress(): void {
-    const stored = localStorage.getItem(this.STORAGE_KEY);
+    const storageKey = this.userService.getUserStorageKey(this.STORAGE_KEY);
+    const stored = localStorage.getItem(storageKey);
     if (stored) {
       try {
         const progress = JSON.parse(stored);
