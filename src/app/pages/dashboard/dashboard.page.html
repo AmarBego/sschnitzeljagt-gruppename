@@ -1,6 +1,9 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>Yapp - Dashboard</ion-title>
+    <ion-title>Yapp</ion-title>
+    <div slot="end" class="timer-display" *ngIf="currentTimer > 0">
+      {{ formatTime(currentTimer) }}
+    </div>
   </ion-toolbar>
 </ion-header>
 
@@ -12,26 +15,18 @@
   </ion-header>
 
   <div class="dashboard-container">
-    <ion-card>
-      <ion-card-header>
-        <ion-card-title>Welcome, {{ userName }}!</ion-card-title>
-        <ion-card-subtitle>Bounty Hunt GPS Tracker</ion-card-subtitle>
-      </ion-card-header>
-      <ion-card-content>
-        <p>Your GPS tracker and QR code scanner are ready to use.</p>
-        <p>Location services: {{ locationStatus }}</p>
-      </ion-card-content>
-    </ion-card>
-
-    <div class="action-buttons">
-      <ion-button expand="block" fill="solid" color="primary">
-        <ion-icon name="location-outline" slot="start"></ion-icon>
-        Track Location
-      </ion-button>
-      
-      <ion-button expand="block" fill="outline" color="secondary">
-        <ion-icon name="qr-code-outline" slot="start"></ion-icon>
-        Scan QR Code
+    <div class="hunt-grid">
+      <ion-button
+        *ngFor="let hunt of hunts"
+        [color]="getHuntButtonColor(hunt)"
+        [fill]="getHuntButtonFill(hunt)"
+        [disabled]="!hunt.isUnlocked"
+        (click)="onHuntClick(hunt)"
+        class="hunt-button">
+        <div class="hunt-content">
+          <div class="hunt-number">{{ hunt.id }}</div>
+          <div class="hunt-title">{{ getHuntDisplayTitle(hunt) }}</div>
+        </div>
       </ion-button>
     </div>
   </div>
