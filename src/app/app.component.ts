@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { trashBin, home, search, person, settings, helpCircleOutline, close, bulbOutline } from 'ionicons/icons';
-import { HuntService } from './services/hunt/hunt.service';
+import { HuntService } from './services/hunt.service';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({
