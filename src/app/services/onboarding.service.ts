@@ -6,10 +6,9 @@ import { PermissionService } from './permission.service';
 import { User } from '../models/user.model';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class OnboardingService {
-  
   private readonly userService = inject(UserService);
   private readonly alertService = inject(AlertService);
   private readonly permissionService = inject(PermissionService);
@@ -24,7 +23,9 @@ export class OnboardingService {
       }
     } catch (error) {
       console.error('Onboarding flow error:', error);
-      await this.alertService.showErrorAlert('An error occurred during setup. Please try again.');
+      await this.alertService.showErrorAlert(
+        'An error occurred during setup. Please try again.'
+      );
     }
   }
   private async handleNewUser(): Promise<void> {
@@ -40,8 +41,9 @@ export class OnboardingService {
       return;
     }
 
-    const locationGranted = await this.permissionService.requestLocationPermission();
-    
+    const locationGranted =
+      await this.permissionService.requestLocationPermission();
+
     if (!locationGranted) {
       const retry = await this.alertService.showPermissionDeniedAlert();
       if (retry) {
@@ -54,10 +56,10 @@ export class OnboardingService {
       name: userName,
       permissions: {
         location: locationGranted,
-        camera: false
+        camera: false,
       },
       isSetupComplete: true,
-      createdAt: new Date()
+      createdAt: new Date(),
     };
 
     await this.userService.saveUser(newUser);
@@ -70,13 +72,17 @@ export class OnboardingService {
       return;
     }
 
-    const hasLocationPermission = await this.permissionService.checkLocationPermission();
+    const hasLocationPermission =
+      await this.permissionService.checkLocationPermission();
     if (!hasLocationPermission) {
       const permissionAccepted = await this.alertService.showPermissionAlert();
       if (permissionAccepted) {
-        const locationGranted = await this.permissionService.requestLocationPermission();
-        await this.userService.updateUserPermissions({ location: locationGranted });
-        
+        const locationGranted =
+          await this.permissionService.requestLocationPermission();
+        await this.userService.updateUserPermissions({
+          location: locationGranted,
+        });
+
         if (!locationGranted) {
           const retry = await this.alertService.showPermissionDeniedAlert();
           if (retry) {

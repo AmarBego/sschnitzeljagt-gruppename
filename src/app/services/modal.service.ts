@@ -3,18 +3,17 @@ import { ModalController } from '@ionic/angular/standalone';
 import { HelpModalComponent } from '../shared/components/help-modal/help-modal.component';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ModalService {
-  
   private readonly modalController = inject(ModalController);
 
   async showHelpModal(): Promise<void> {
     const modal = await this.modalController.create({
       component: HelpModalComponent,
-      cssClass: 'help-modal'
+      cssClass: 'help-modal',
     });
-    
+
     await modal.present();
   }
 

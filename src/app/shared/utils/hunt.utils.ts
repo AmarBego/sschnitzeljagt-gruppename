@@ -10,30 +10,44 @@ export function findHuntOrFail(progress: HuntProgress, huntId: number): Hunt {
 
 export function ensureHuntIsUnlocked(hunt: Hunt): void {
   if (!hunt.isUnlocked) {
-    throw new Error(`Hunt '${hunt.title}' (ID ${hunt.id}) is locked and cannot be started.`);
+    throw new Error(
+      `Hunt '${hunt.title}' (ID ${hunt.id}) is locked and cannot be started.`
+    );
   }
 }
 
 export function ensureHuntIsNotCompleted(hunt: Hunt): void {
   if (hunt.isCompleted) {
-    throw new Error(`Hunt '${hunt.title}' (ID ${hunt.id}) is already completed.`);
+    throw new Error(
+      `Hunt '${hunt.title}' (ID ${hunt.id}) is already completed.`
+    );
   }
 }
 
 export function ensureHuntHasStartTime(hunt: Hunt): void {
   if (!hunt.startTime) {
-    throw new Error(`Hunt '${hunt.title}' (ID ${hunt.id}). Start time is missing.`);
+    throw new Error(
+      `Hunt '${hunt.title}' (ID ${hunt.id}). Start time is missing.`
+    );
   }
 }
 
-export function calculateHuntDuration(startTime: Date | undefined, completionTime: Date): number {
+export function calculateHuntDuration(
+  startTime: Date | undefined,
+  completionTime: Date
+): number {
   if (!startTime) {
     return 0;
   }
-  return Math.floor((completionTime.getTime() - new Date(startTime).getTime()) / 1000);
+  return Math.floor(
+    (completionTime.getTime() - new Date(startTime).getTime()) / 1000
+  );
 }
 
-export function unlockNextHunt(progress: HuntProgress, completedHuntId: number): void {
+export function unlockNextHunt(
+  progress: HuntProgress,
+  completedHuntId: number
+): void {
   const nextHunt = progress.hunts.find(h => h.id === completedHuntId + 1);
   if (nextHunt) {
     nextHunt.isUnlocked = true;

@@ -22,18 +22,18 @@
   --border-style: solid;
   height: 100px;
   margin: 0;
-  
+
   .hunt-content {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 4px;
-    
+
     .hunt-number {
       font-size: 24px;
       font-weight: bold;
     }
-    
+
     .hunt-title {
       font-size: 12px;
       text-align: center;
@@ -48,29 +48,50 @@
   }
 
   // Status color definitions
-  &[data-status="unlocked"], &[data-status="started"] { 
-    --border-color: #ffffff; --color: #ffffff; 
-    &:hover { --border-color: #f5f5f5; --color: #f5f5f5; }
+  &[data-status="unlocked"],
+  &[data-status="started"] {
+    --border-color: #ffffff;
+    --color: #ffffff;
+    &:hover {
+      --border-color: #f5f5f5;
+      --color: #f5f5f5;
+    }
   }
-  &[data-status="started"] { background-color: rgba(255, 255, 255, 0.05); }
-  
-  &[data-status="locked"] { 
-    --border-color: #666666; --color: #666666; opacity: 0.5; 
+  &[data-status="started"] {
+    background-color: rgba(255, 255, 255, 0.05);
   }
-  
-  &[data-status="completed"] { 
-    --border-color: #28a745; --color: #28a745;
-    &:hover { --border-color: #34ce57; --color: #34ce57; }
+
+  &[data-status="locked"] {
+    --border-color: #666666;
+    --color: #666666;
+    opacity: 0.5;
   }
-  
-  &[data-status="skipped"] { 
-    --border-color: #ffc107; --color: #ffc107;
-    &:hover { --border-color: #e0a800; --color: #e0a800; }
+
+  &[data-status="completed"] {
+    --border-color: #28a745;
+    --color: #28a745;
+    &:hover {
+      --border-color: #34ce57;
+      --color: #34ce57;
+    }
   }
-  
-  &[data-status="late"] { 
-    --border-color: #007bff; --color: #007bff;
-    &:hover { --border-color: #0056b3; --color: #0056b3; }
+
+  &[data-status="skipped"] {
+    --border-color: #ffc107;
+    --color: #ffc107;
+    &:hover {
+      --border-color: #e0a800;
+      --color: #e0a800;
+    }
+  }
+
+  &[data-status="late"] {
+    --border-color: #007bff;
+    --color: #007bff;
+    &:hover {
+      --border-color: #0056b3;
+      --color: #0056b3;
+    }
   }
 }
 
@@ -79,12 +100,12 @@
   display: flex;
   align-items: stretch;
   gap: 8px;
-  
+
   .hunt-button {
     flex: 1;
     // ...existing hunt-button styles...
   }
-  
+
   .skip-button {
     --background: rgba(255, 193, 7, 0.1);
     --background-hover: rgba(255, 193, 7, 0.2);
@@ -96,35 +117,35 @@
     --border-style: solid;
     --border-color: #ffc107;
     --box-shadow: none;
-    
+
     width: 48px;
     height: 100px;
     margin: 0;
-    
+
     display: flex;
     align-items: center;
     justify-content: center;
-    
+
     ion-icon {
       font-size: 20px;
       color: var(--color);
     }
-    
+
     &:hover {
       --background: var(--background-hover);
       --color: var(--color-hover);
       --border-color: var(--color-hover);
     }
-    
+
     &:active {
       --background: var(--background-activated);
     }
-    
+
     // Responsive sizing
     @media (min-width: 768px) {
       height: 120px;
       width: 56px;
-      
+
       ion-icon {
         font-size: 24px;
       }
@@ -133,14 +154,16 @@
 }
 
 .timer-display {
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   font-size: 16px;
   font-weight: bold;
   color: var(--ion-color-primary);
 }
 
 // Component styling
-ion-toolbar { --min-height: 56px; }
+ion-toolbar {
+  --min-height: 56px;
+}
 
 ion-fab ion-fab-button {
   --background: rgba(255, 69, 58, 0.9);
@@ -150,21 +173,28 @@ ion-fab ion-fab-button {
   --border-radius: 50%;
   width: 48px;
   height: 48px;
-  
+
   &:hover {
     --background: rgba(255, 69, 58, 1);
     --box-shadow: 0 6px 20px rgba(255, 69, 58, 0.4);
   }
-  
-  ion-icon { font-size: 20px; color: white; }
+
+  ion-icon {
+    font-size: 20px;
+    color: white;
+  }
 }
 
 // Responsive & Modal styling
 @media (min-width: 768px) {
-  .hunt-grid { gap: 16px; }
-  .hunt-button { 
+  .hunt-grid {
+    gap: 16px;
+  }
+  .hunt-button {
     height: 120px;
-    .hunt-content .hunt-title { font-size: 14px; }
+    .hunt-content .hunt-title {
+      font-size: 14px;
+    }
   }
 }
 
@@ -173,7 +203,7 @@ ion-fab ion-fab-button {
   --max-height: 90%;
   --border-radius: 16px;
   --backdrop-opacity: 0.3;
-  
+
   @media (min-width: 768px) {
     --max-width: 600px;
     --max-height: 80%;

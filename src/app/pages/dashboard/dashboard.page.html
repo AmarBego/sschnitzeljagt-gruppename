@@ -3,9 +3,7 @@
     <ion-title>Yapp</ion-title>
     <div slot="end" class="toolbar-end">
       @if (currentTimer > 0) {
-        <div class="timer-display">
-          {{ formatTime(currentTimer) }}
-        </div>
+        <div class="timer-display">{{ formatTime(currentTimer) }}</div>
       }
       <ion-button fill="clear" size="small" (click)="onHelpClick()">
         <ion-icon name="help-circle-outline" slot="icon-only"></ion-icon>
@@ -14,7 +12,8 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">  <ion-header collapse="condense">
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
     <ion-toolbar>
       <ion-title size="large">Yapp</ion-title>
       <ion-button fill="clear" slot="end" (click)="onHelpClick()">
@@ -22,7 +21,8 @@
       </ion-button>
     </ion-toolbar>
   </ion-header>
-  <div class="dashboard-container">    <div class="hunt-grid">
+  <div class="dashboard-container">
+    <div class="hunt-grid">
       @for (hunt of hunts; track hunt.id) {
         <div class="hunt-item">
           <ion-button
@@ -30,20 +30,22 @@
             [disabled]="!hunt.isUnlocked"
             (click)="onHuntClick(hunt)"
             class="hunt-button"
-            [attr.data-status]="getHuntStatus(hunt)">
+            [attr.data-status]="getHuntStatus(hunt)"
+          >
             <div class="hunt-content">
               <div class="hunt-number">{{ hunt.id }}</div>
               <div class="hunt-title">{{ getHuntDisplayTitle(hunt) }}</div>
             </div>
-          </ion-button>          
+          </ion-button>
         </div>
       }
-    </div>  
+    </div>
   </div>
 
   <!-- Animated Action Button -->
-  <app-animated-action-button 
+  <app-animated-action-button
     position="bottom-start"
-    (actionPerformed)="onActionPerformed($event)">
+    (actionPerformed)="onActionPerformed($event)"
+  >
   </app-animated-action-button>
 </ion-content>

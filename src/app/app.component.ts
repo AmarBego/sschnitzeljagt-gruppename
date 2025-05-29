@@ -1,7 +1,16 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { trashBin, home, search, person, settings, helpCircleOutline, close, bulbOutline } from 'ionicons/icons';
+import {
+  trashBin,
+  home,
+  search,
+  person,
+  settings,
+  helpCircleOutline,
+  close,
+  bulbOutline,
+} from 'ionicons/icons';
 import { HuntService } from './services/hunt.service';
 import { Subject, takeUntil } from 'rxjs';
 
@@ -16,7 +25,16 @@ export class AppComponent implements OnInit, OnDestroy {
   private appHiddenTime?: Date;
 
   constructor() {
-    addIcons({ trashBin, home, search, person, settings, helpCircleOutline, close, bulbOutline });
+    addIcons({
+      trashBin,
+      home,
+      search,
+      person,
+      settings,
+      helpCircleOutline,
+      close,
+      bulbOutline,
+    });
   }
 
   ngOnInit() {
@@ -32,18 +50,27 @@ export class AppComponent implements OnInit, OnDestroy {
 
   private setupAppLifecycleListeners() {
     // Listen for page visibility changes (web/PWA)
-    document.addEventListener('visibilitychange', this.handleVisibilityChange.bind(this));
-    
+    document.addEventListener(
+      'visibilitychange',
+      this.handleVisibilityChange.bind(this)
+    );
+
     // Listen for beforeunload (web)
     window.addEventListener('beforeunload', this.handleBeforeUnload.bind(this));
-    
+
     // Listen for pagehide (web)
     window.addEventListener('pagehide', this.handlePageHide.bind(this));
   }
 
   private removeAppLifecycleListeners() {
-    document.removeEventListener('visibilitychange', this.handleVisibilityChange.bind(this));
-    window.removeEventListener('beforeunload', this.handleBeforeUnload.bind(this));
+    document.removeEventListener(
+      'visibilitychange',
+      this.handleVisibilityChange.bind(this)
+    );
+    window.removeEventListener(
+      'beforeunload',
+      this.handleBeforeUnload.bind(this)
+    );
     window.removeEventListener('pagehide', this.handlePageHide.bind(this));
   }
 

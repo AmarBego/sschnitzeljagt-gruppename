@@ -3,7 +3,7 @@ import { BehaviorSubject, interval, Subscription } from 'rxjs';
 import { TimerState } from '../models/timer.model';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class TimerService implements OnDestroy {
   private readonly TIMER_STORAGE_KEY = 'timer_state';
@@ -30,13 +30,15 @@ export class TimerService implements OnDestroy {
     this.stopTimer();
     this.startTime = fromTime || new Date();
     this.currentHuntId = huntId;
-    
+
     // Save timer state to localStorage
     this.saveTimerState();
-    
+
     this.timerSubscription = interval(1000).subscribe(() => {
       if (this.startTime) {
-        const elapsed = Math.floor((Date.now() - this.startTime.getTime()) / 1000);
+        const elapsed = Math.floor(
+          (Date.now() - this.startTime.getTime()) / 1000
+        );
         this.timerSubject.next(elapsed);
         // Periodically save state while running
         this.saveTimerState();
@@ -61,7 +63,9 @@ export class TimerService implements OnDestroy {
 
   resumeTimer(): void {
     if (this.startTime) {
-      const timeWhenPaused = new Date(Date.now() - (this.timerSubject.value * 1000));
+      const timeWhenPaused = new Date(
+        Date.now() - this.timerSubject.value * 1000
+      );
       this.startTimer(timeWhenPaused, this.currentHuntId);
     }
   }
@@ -80,7 +84,7 @@ export class TimerService implements OnDestroy {
         isRunning: this.isRunning,
         startTime: this.startTime,
         elapsedTime: this.currentElapsedTime,
-        huntId: this.currentHuntId
+        huntId: this.currentHuntId,
       };
       localStorage.setItem(this.TIMER_STORAGE_KEY, JSON.stringify(state));
     }

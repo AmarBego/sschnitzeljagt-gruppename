@@ -3,11 +3,12 @@ import { Routes } from '@angular/router';
 export const routes: Routes = [
   {
     path: 'home',
-    loadComponent: () => import('./pages/home/home.page').then((m) => m.HomePage),
+    loadComponent: () => import('./pages/home/home.page').then(m => m.HomePage),
   },
   {
     path: 'dashboard',
-    loadComponent: () => import('./pages/dashboard/dashboard.page').then((m) => m.DashboardPage),
+    loadComponent: () =>
+      import('./pages/dashboard/dashboard.page').then(m => m.DashboardPage),
   },
   {
     path: '',
@@ -16,26 +17,32 @@ export const routes: Routes = [
   },
   {
     path: 'hunt1',
-    loadComponent: () => import('./pages/hunts/hunt1/hunt1.page').then( m => m.Hunt1Page)
+    loadComponent: () =>
+      import('./pages/hunts/hunt1/hunt1.page').then(m => m.Hunt1Page),
   },
   {
     path: 'hunt2',
-    loadComponent: () => import('./pages/hunts/hunt2/hunt2.page').then( m => m.Hunt2Page)
+    loadComponent: () =>
+      import('./pages/hunts/hunt2/hunt2.page').then(m => m.Hunt2Page),
   },
   {
     path: 'hunt3',
-    loadComponent: () => import('./pages/hunts/hunt3/hunt3.page').then( m => m.Hunt3Page)
+    loadComponent: () =>
+      import('./pages/hunts/hunt3/hunt3.page').then(m => m.Hunt3Page),
   },
   {
     path: 'hunt4',
-    loadComponent: () => import('./pages/hunts/hunt4/hunt4.page').then( m => m.Hunt4Page)
+    loadComponent: () =>
+      import('./pages/hunts/hunt4/hunt4.page').then(m => m.Hunt4Page),
   },
   {
     path: 'hunt5',
-    loadComponent: () => import('./pages/hunts/hunt5/hunt5.page').then( m => m.Hunt5Page)
+    loadComponent: () =>
+      import('./pages/hunts/hunt5/hunt5.page').then(m => m.Hunt5Page),
   },
   {
     path: 'hunt6',
-    loadComponent: () => import('./pages/hunts/hunt6/hunt6.page').then( m => m.Hunt6Page)
+    loadComponent: () =>
+      import('./pages/hunts/hunt6/hunt6.page').then(m => m.Hunt6Page),
   },
 ];

@@ -6,13 +6,15 @@ import { TimerService } from './timer.service';
 import { INITIAL_HUNTS } from '../data/hunt.data';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class HuntService {
   private readonly STORAGE_KEY = 'hunt_progress';
   private readonly ABANDONMENT_THRESHOLD = 30000; // 30 seconds to consider abandoned
-  private readonly progressSubject = new BehaviorSubject<HuntProgress>(this.getInitialProgress());
-  
+  private readonly progressSubject = new BehaviorSubject<HuntProgress>(
+    this.getInitialProgress()
+  );
+
   private readonly userService = inject(UserService);
   private readonly timerService = inject(TimerService);
 
@@ -29,7 +31,7 @@ export class HuntService {
   startHunt(huntId: number): void {
     const progress = this.currentProgress;
     this.validateHuntCanBeStarted(progress, huntId);
-    
+
     const hunt = progress.hunts.find(h => h.id === huntId)!;
     hunt.startTime = new Date();
     progress.currentActiveHunt = huntId;
@@ -38,17 +40,30 @@ export class HuntService {
     this.updateProgress(progress);
   }
 
-  private validateHuntCanBeStarted(progress: HuntProgress, huntId: number): void {
+  private validateHuntCanBeStarted(
+    progress: HuntProgress,
+    huntId: number
+  ): void {
     this.ensureHuntIsNotAlreadyActive(progress, huntId);
     const hunt = this.findHuntOrFail(progress, huntId);
     this.ensureHuntIsUnlocked(hunt);
     this.ensureHuntIsNotCompleted(hunt);
   }
 
-  private ensureHuntIsNotAlreadyActive(progress: HuntProgress, huntId: number): void {
-    if (progress.currentActiveHunt !== undefined && progress.currentActiveHunt !== huntId) {
-      const activeHuntDetails = progress.hunts.find(h => h.id === progress.currentActiveHunt);
-      throw new Error(`Cannot start Hunt ID ${huntId}. Hunt '${activeHuntDetails?.title || progress.currentActiveHunt}' is already in progress.`);
+  private ensureHuntIsNotAlreadyActive(
+    progress: HuntProgress,
+    huntId: number
+  ): void {
+    if (
+      progress.currentActiveHunt !== undefined &&
+      progress.currentActiveHunt !== huntId
+    ) {
+      const activeHuntDetails = progress.hunts.find(
+        h => h.id === progress.currentActiveHunt
+      );
+      throw new Error(
+        `Cannot start Hunt ID ${huntId}. Hunt '${activeHuntDetails?.title || progress.currentActiveHunt}' is already in progress.`
+      );
     }
   }
 
@@ -62,13 +77,17 @@ export class HuntService {
 
   private ensureHuntIsUnlocked(hunt: Hunt): void {
     if (!hunt.isUnlocked) {
-      throw new Error(`HuntService: Hunt '${hunt.title}' (ID ${hunt.id}) is locked and cannot be started.`);
+      throw new Error(
+        `HuntService: Hunt '${hunt.title}' (ID ${hunt.id}) is locked and cannot be started.`
+      );
     }
   }
 
   private ensureHuntIsNotCompleted(hunt: Hunt): void {
     if (hunt.isCompleted) {
-      throw new Error(`HuntService: Hunt '${hunt.title}' (ID ${hunt.id}) is already completed.`);
+      throw new Error(
+        `HuntService: Hunt '${hunt.title}' (ID ${hunt.id}) is already completed.`
+      );
     }
   }
 
@@ -78,11 +97,12 @@ export class HuntService {
 
     const hunt = progress.hunts.find(h => h.id === huntId)!;
     const completionTime = new Date();
-    
+
     hunt.isCompleted = true;
     hunt.completionTime = completionTime;
-    hunt.duration = hunt.startTime ? 
-      Math.floor((completionTime.getTime() - hunt.startTime.getTime()) / 1000) : 0;
+    hunt.duration = hunt.startTime
+      ? Math.floor((completionTime.getTime() - hunt.startTime.getTime()) / 1000)
+      : 0;
 
     // Check if completion is late (exceeds maximum duration)
     if (hunt.maxDuration && hunt.duration > hunt.maxDuration) {
@@ -97,7 +117,10 @@ export class HuntService {
     this.updateProgress(progress);
   }
 
-  private validateHuntCanBeCompleted(progress: HuntProgress, huntId: number): void {
+  private validateHuntCanBeCompleted(
+    progress: HuntProgress,
+    huntId: number
+  ): void {
     const hunt = this.findHuntOrFail(progress, huntId);
     this.ensureHuntIsActive(progress, hunt);
     this.ensureHuntIsNotCompleted(hunt);
@@ -106,13 +129,17 @@ export class HuntService {
 
   private ensureHuntIsActive(progress: HuntProgress, hunt: Hunt): void {
     if (progress.currentActiveHunt !== hunt.id) {
-      throw new Error(`HuntService: Cannot complete Hunt '${hunt.title}' (ID ${hunt.id}). It is not the currently active hunt.`);
+      throw new Error(
+        `HuntService: Cannot complete Hunt '${hunt.title}' (ID ${hunt.id}). It is not the currently active hunt.`
+      );
     }
   }
 
   private ensureHuntHasStartTime(hunt: Hunt): void {
     if (!hunt.startTime) {
-      throw new Error(`HuntService: Cannot complete Hunt '${hunt.title}' (ID ${hunt.id}). Start time is missing.`);
+      throw new Error(
+        `HuntService: Cannot complete Hunt '${hunt.title}' (ID ${hunt.id}). Start time is missing.`
+      );
     }
   }
 
@@ -133,7 +160,7 @@ export class HuntService {
     const initialProgress = this.getInitialProgress();
     this.updateProgress(initialProgress);
     this.timerService.stopTimer();
-    
+
     // Clear user-specific data
     this.userService.clearUserData();
   }
@@ -142,21 +169,22 @@ export class HuntService {
     // Reset to initial state first
     this.progressSubject.next(this.getInitialProgress());
     this.timerService.stopTimer();
-    
+
     // Then load user-specific progress
     this.loadProgress();
-  }  private loadProgress(): void {
+  }
+  private loadProgress(): void {
     const storageKey = this.userService.getUserStorageKey(this.STORAGE_KEY);
     const stored = localStorage.getItem(storageKey);
-    
+
     if (!stored) return;
 
     try {
       const progress = JSON.parse(stored);
-      
+
       // Check for abandoned hunts on app restart
       this.checkForAbandonedHunt(progress);
-      
+
       this.progressSubject.next(progress);
       this.resumeActiveHuntTimer(progress);
     } catch (error) {
@@ -166,36 +194,44 @@ export class HuntService {
 
   private checkForAbandonedHunt(progress: HuntProgress): void {
     const backgroundTimeStr = localStorage.getItem('app_background_time');
-    
+
     if (progress.currentActiveHunt && backgroundTimeStr) {
       try {
         const backgroundTime = new Date(backgroundTimeStr);
         const currentTime = new Date();
         const timeAway = currentTime.getTime() - backgroundTime.getTime();
-        
+
         // If app was away for more than threshold, mark hunt as abandoned
         if (timeAway > this.ABANDONMENT_THRESHOLD) {
-          this.markHuntAsSkipped(progress.currentActiveHunt, `App was away for ${Math.round(timeAway / 1000)} seconds`);
+          this.markHuntAsSkipped(
+            progress.currentActiveHunt,
+            `App was away for ${Math.round(timeAway / 1000)} seconds`
+          );
         }
       } catch (error) {
         console.error('Error checking abandoned hunt:', error);
       }
-      
+
       localStorage.removeItem('app_background_time');
     }
   }
   private resumeActiveHuntTimer(progress: HuntProgress): void {
     if (!progress.currentActiveHunt) return;
 
-    const activeHunt = progress.hunts.find(h => h.id === progress.currentActiveHunt);
+    const activeHunt = progress.hunts.find(
+      h => h.id === progress.currentActiveHunt
+    );
     if (activeHunt?.startTime && !activeHunt.isCompleted) {
-      this.timerService.startTimer(new Date(activeHunt.startTime), activeHunt.id);
+      this.timerService.startTimer(
+        new Date(activeHunt.startTime),
+        activeHunt.id
+      );
     }
   }
   private getInitialProgress(): HuntProgress {
     return {
       hunts: JSON.parse(JSON.stringify(INITIAL_HUNTS)), // Deep copy to avoid modifying the original data
-      totalCompleted: 0
+      totalCompleted: 0,
     };
   }
 
@@ -217,7 +253,10 @@ export class HuntService {
     // Check if the hunt should be marked as abandoned when app comes back
     const progress = this.currentProgress;
     if (progress.currentActiveHunt && timeAway > this.ABANDONMENT_THRESHOLD) {
-      this.markHuntAsSkipped(progress.currentActiveHunt, 'App was closed/minimized too long');
+      this.markHuntAsSkipped(
+        progress.currentActiveHunt,
+        'App was closed/minimized too long'
+      );
     }
     localStorage.removeItem('app_background_time');
   }
@@ -233,20 +272,23 @@ export class HuntService {
   private markHuntAsSkipped(huntId: number, reason: string): void {
     const progress = this.currentProgress;
     const hunt = progress.hunts.find(h => h.id === huntId);
-    
+
     if (!hunt || hunt.isCompleted || hunt.isSkipped) {
       return;
     }
 
     console.log(`Marking hunt ${huntId} as skipped: ${reason}`);
-    
+
     hunt.isSkipped = true;
     hunt.completionTime = new Date();
-    hunt.duration = hunt.startTime ? 
-      Math.floor((hunt.completionTime.getTime() - hunt.startTime.getTime()) / 1000) : 0;
+    hunt.duration = hunt.startTime
+      ? Math.floor(
+          (hunt.completionTime.getTime() - hunt.startTime.getTime()) / 1000
+        )
+      : 0;
 
     progress.currentActiveHunt = undefined;
-    
+
     // Unlock next hunt even if this one was skipped
     this.unlockNextHunt(progress, huntId);
     this.timerService.stopTimer();

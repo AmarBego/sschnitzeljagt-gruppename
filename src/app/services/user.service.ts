@@ -4,7 +4,7 @@ import { map } from 'rxjs/operators';
 import { User } from '../models/user.model';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class UserService {
   private readonly STORAGE_KEY = 'yapp_user';
@@ -30,17 +30,21 @@ export class UserService {
       this.userSubject.next(user);
     } catch (error) {
       console.error('UserService: Failed to save user to localStorage.', error);
-      throw new Error('Failed to save user data. Storage might be full or unavailable.');
+      throw new Error(
+        'Failed to save user data. Storage might be full or unavailable.'
+      );
     }
   }
 
-  async updateUserPermissions(permissions: Partial<User['permissions']>): Promise<void> {
+  async updateUserPermissions(
+    permissions: Partial<User['permissions']>
+  ): Promise<void> {
     const user = this.currentUser;
     if (!user) return;
 
     const updatedUser = {
       ...user,
-      permissions: { ...user.permissions, ...permissions }
+      permissions: { ...user.permissions, ...permissions },
     };
     await this.saveUser(updatedUser);
   }
@@ -65,7 +69,7 @@ export class UserService {
       const huntProgressKey = this.getUserStorageKey('hunt_progress');
       localStorage.removeItem(huntProgressKey);
     }
-    
+
     localStorage.removeItem(this.STORAGE_KEY);
     this.userSubject.next(null);
   }

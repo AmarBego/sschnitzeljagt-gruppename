@@ -1,5 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { IonHeader, IonToolbar, IonTitle, IonContent } from '@ionic/angular/standalone';
+import {
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonContent,
+} from '@ionic/angular/standalone';
 import { OnboardingService } from '../../services/onboarding.service';
 
 @Component({
@@ -9,7 +14,6 @@ import { OnboardingService } from '../../services/onboarding.service';
   imports: [IonHeader, IonToolbar, IonTitle, IonContent],
 })
 export class HomePage implements OnInit {
-  
   constructor(private onboardingService: OnboardingService) {}
 
   async ngOnInit(): Promise<void> {

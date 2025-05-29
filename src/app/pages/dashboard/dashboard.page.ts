@@ -7,23 +7,22 @@ import { AlertService } from '../../services/alert.service';
 import { ModalService } from '../../services/modal.service';
 import { Hunt, HuntProgress } from '../../models/hunt.model';
 import { IONIC_COMPONENTS } from '../../shared/utils/ionic.utils';
-import { AnimatedActionButtonComponent, ButtonState } from '../../shared/components/animated-action-button/animated-action-button.component';
+import {
+  AnimatedActionButtonComponent,
+  ButtonState,
+} from '../../shared/components/animated-action-button/animated-action-button.component';
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.page.html',
   styleUrls: ['./dashboard.page.scss'],
-  imports: [
-    CommonModule,
-    ...IONIC_COMPONENTS,
-    AnimatedActionButtonComponent
-  ]
+  imports: [CommonModule, ...IONIC_COMPONENTS, AnimatedActionButtonComponent],
 })
 export class DashboardPage implements OnInit, OnDestroy {
   hunts: Hunt[] = [];
   currentTimer = 0;
   currentActiveHunt?: number;
-  
+
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -35,14 +34,12 @@ export class DashboardPage implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     // Subscribe to user changes to reload user-specific progress
-    this.userService.user$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(user => {
-        if (user) {
-          // User logged in or changed, reload their progress
-          this.huntService.reloadUserProgress();
-        }
-      });
+    this.userService.user$.pipe(takeUntil(this.destroy$)).subscribe(user => {
+      if (user) {
+        // User logged in or changed, reload their progress
+        this.huntService.reloadUserProgress();
+      }
+    });
 
     this.huntService.progress$
       .pipe(takeUntil(this.destroy$))
@@ -51,11 +48,9 @@ export class DashboardPage implements OnInit, OnDestroy {
         this.currentActiveHunt = progress.currentActiveHunt;
       });
 
-    this.huntService.timer$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(time => {
-        this.currentTimer = time;
-      });
+    this.huntService.timer$.pipe(takeUntil(this.destroy$)).subscribe(time => {
+      this.currentTimer = time;
+    });
   }
 
   ngOnDestroy(): void {

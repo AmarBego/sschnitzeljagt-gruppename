@@ -30,7 +30,7 @@ import {
   IonSplitPane,
   IonApp,
   IonRouterLink,
-  IonFooter
+  IonFooter,
 } from '@ionic/angular/standalone';
 
 // Services and controllers
@@ -68,5 +68,5 @@ export const IONIC_COMPONENTS = [
   IonSplitPane,
   IonApp,
   IonRouterLink,
-  IonFooter
+  IonFooter,
 ];

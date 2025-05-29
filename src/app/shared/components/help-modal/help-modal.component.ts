@@ -8,13 +8,12 @@ import { IONIC_COMPONENTS } from '../../utils/ionic.utils';
   templateUrl: './help-modal.component.html',
   styleUrls: ['./help-modal.component.scss'],
   standalone: true,
-  imports: [CommonModule, ...IONIC_COMPONENTS]
+  imports: [CommonModule, ...IONIC_COMPONENTS],
 })
 export class HelpModalComponent {
-
   private modalController = inject(ModalController);
 
-  constructor() { }
+  constructor() {}
 
   dismiss() {
     this.modalController.dismiss();
@@ -24,31 +23,31 @@ export class HelpModalComponent {
       icon: '⚪',
       color: '#ffffff',
       label: 'White outline',
-      description: 'Unlocked & ready to start'
+      description: 'Unlocked & ready to start',
     },
     {
       icon: '⚫',
       color: '#666666',
       label: 'Dark outline',
-      description: 'Locked (complete previous hunt first)'
+      description: 'Locked (complete previous hunt first)',
     },
     {
       icon: '🟢',
       color: '#28a745',
       label: 'Green outline',
-      description: 'Completed successfully'
+      description: 'Completed successfully',
     },
     {
       icon: '🟡',
       color: '#ffc107',
       label: 'Yellow outline',
-      description: 'Skipped hunt'
+      description: 'Skipped hunt',
     },
     {
       icon: '🔵',
       color: '#007bff',
       label: 'Blue outline',
-      description: 'Late completion'
-    }
+      description: 'Late completion',
+    },
   ];
 }

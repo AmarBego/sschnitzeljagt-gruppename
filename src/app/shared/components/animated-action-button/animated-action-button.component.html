@@ -1,13 +1,16 @@
-<ion-fab 
-  [vertical]="'bottom'" 
-  [horizontal]="currentState === 'reset' ? 'start' : 'end'" 
+<ion-fab
+  [vertical]="'bottom'"
+  [horizontal]="currentState === 'reset' ? 'start' : 'end'"
   slot="fixed"
   [class]="getButtonClass()"
-  [attr.data-state]="currentState">  <ion-fab-button 
-    [color]="getButtonColor()" 
-    size="small" 
+  [attr.data-state]="currentState"
+>
+  <ion-fab-button
+    [color]="getButtonColor()"
+    size="small"
     (click)="onButtonClick()"
-    [class]="'fab-' + currentState">
+    [class]="'fab-' + currentState"
+  >
     <ion-icon [name]="getButtonIcon()"></ion-icon>
   </ion-fab-button>
 </ion-fab>
