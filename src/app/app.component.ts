@@ -50,8 +50,6 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit() {
-    // Configure status bar for fullscreen experience
-    await this.statusBarService.configureStatusBar();
     // Listen for app visibility changes
     this.setupAppLifecycleListeners();
   }
