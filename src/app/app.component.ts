@@ -11,6 +11,8 @@ import {
   close,
   bulbOutline,
   timeOutline,
+  checkmarkCircleOutline,
+  warningOutline,
 } from 'ionicons/icons';
 import { HuntService } from './services/hunt.service';
 import { Subject, takeUntil } from 'rxjs';
@@ -36,6 +38,8 @@ export class AppComponent implements OnInit, OnDestroy {
       close,
       bulbOutline,
       timeOutline,
+      checkmarkCircleOutline,
+      warningOutline,
     });
   }
 
