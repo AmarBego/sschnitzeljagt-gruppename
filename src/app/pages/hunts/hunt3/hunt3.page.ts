@@ -4,10 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { IONIC_COMPONENTS } from '../../../shared/utils/ionic.utils';
 import { AnimatedActionButtonComponent } from '../../../shared/components/animated-action-button/animated-action-button.component';
 import { HuntTimerComponent } from '../../../shared/components/hunt-timer/hunt-timer.component';
-import {
-  HuntPageData,
-  HuntPageHelper,
-} from '../../../shared/utils/hunt-page.helper';
+import { HuntPageHelper } from '../../../shared/utils/hunt-page.helper';
 import { BaseHuntPage } from '../../../shared/utils/base-hunt.page';
 
 @Component({

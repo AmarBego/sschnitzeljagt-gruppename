@@ -4,7 +4,7 @@ import { Injectable, inject } from '@angular/core';
 import { HuntProgressService } from './hunt-progress.service';
 import { HuntOrchestrationService } from './hunt-orchestration.service';
 import { TimerService } from '../timer.service';
-import { Hunt, HuntProgress } from '../../models/hunt.model';
+import { HuntProgress } from '../../models/hunt.model';
 
 @Injectable({
   providedIn: 'root',

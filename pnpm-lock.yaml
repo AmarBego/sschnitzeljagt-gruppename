@@ -32,12 +32,24 @@ importers:
       '@angular/router':
         specifier: ^19.0.0
         version: 19.2.13(@angular/common@19.2.13(@angular/core@19.2.13(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@19.2.13(rxjs@7.8.2)(zone.js@0.15.1))(@angular/platform-browser@19.2.13(@angular/animations@19.2.13(@angular/common@19.2.13(@angular/core@19.2.13(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@19.2.13(rxjs@7.8.2)(zone.js@0.15.1)))(@angular/common@19.2.13(@angular/core@19.2.13(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@19.2.13(rxjs@7.8.2)(zone.js@0.15.1)))(rxjs@7.8.2)
+      '@capacitor/android':
+        specifier: ^7.2.0
+        version: 7.2.0(@capacitor/core@7.2.0)
       '@capacitor/app':
         specifier: 7.0.1
         version: 7.0.1(@capacitor/core@7.2.0)
+      '@capacitor/barcode-scanner':
+        specifier: ^2.0.3
+        version: 2.0.3(@capacitor/core@7.2.0)
       '@capacitor/core':
         specifier: 7.2.0
         version: 7.2.0
+      '@capacitor/device':
+        specifier: ^7.0.1
+        version: 7.0.1(@capacitor/core@7.2.0)
+      '@capacitor/geolocation':
+        specifier: ^7.1.2
+        version: 7.1.2(@capacitor/core@7.2.0)
       '@capacitor/haptics':
         specifier: 7.0.1
         version: 7.0.1(@capacitor/core@7.2.0)
@@ -898,8 +910,18 @@ packages:
     resolution: {integrity: sha512-Y1GkI4ktrtvmawoSq+4FCVHNryea6uR+qUQy0AGxLSsjCX0nVmkYQMBLHDkXZuo5hGx7eYdnIaslsdBFm7zbUw==}
     engines: {node: '>=6.9.0'}
 
+  '@capacitor/android@7.2.0':
+    resolution: {integrity: sha512-zdhEy3jZPG5Toe/pGzKtDgIiBGywjaoEuQWnGVjBYPlSAEUtAhpZ2At7V0SCb26yluAuzrAUV0Ue+LQeEtHwFQ==}
+    peerDependencies:
+      '@capacitor/core': ^7.2.0
+
   '@capacitor/app@7.0.1':
     resolution: {integrity: sha512-ArlVZAAla4MwQoKh26x2AaTDOBh5Vhp1VhMKR3RwqZSsZnazKTFGNrPbr9Ez5r1knnEDfApyjwp1uZnXK1WTYQ==}
+    peerDependencies:
+      '@capacitor/core': '>=7.0.0'
+
+  '@capacitor/barcode-scanner@2.0.3':
+    resolution: {integrity: sha512-ZELdXMRR1fgCWDVbSJtmaEtQeWFknYq09hxJuFyyzqvd31OsexJLMKMFmlq9N+NMEW8jwHaWKa08GlEIxyjzOw==}
     peerDependencies:
       '@capacitor/core': '>=7.0.0'
 
@@ -910,6 +932,16 @@ packages:
 
   '@capacitor/core@7.2.0':
     resolution: {integrity: sha512-2zCnA6RJeZ9ec4470o8QMZEQTWpekw9FNoqm5TLc10jeCrhvHVI8MPgxdZVc3mOdFlyieYu4AS1fNxSqbS57Pw==}
+
+  '@capacitor/device@7.0.1':
+    resolution: {integrity: sha512-ImjR2LmCEhbckYtOHXTfi5v6B7d4HPX9uKIAQs7wzzmE+yRRXuUTEzARBQ00dZDInAInkbuyQRdjwPTSHZUpnw==}
+    peerDependencies:
+      '@capacitor/core': '>=7.0.0'
+
+  '@capacitor/geolocation@7.1.2':
+    resolution: {integrity: sha512-J++OuOpn6Bjweo7SZ+jwI/dhVF9DNw6Wx0UHgQ4qfrATqmNKGNZ/BUljGhXiKJceSx2GIhfrYS7BYqo3uWibgQ==}
+    peerDependencies:
+      '@capacitor/core': '>=7.0.0'
 
   '@capacitor/haptics@7.0.1':
     resolution: {integrity: sha512-ewZmspE5krgDUj5ZvUDcfNZvgerAIr+3bDSk6DLzyvBZ/dYmr/tMLu5H6WtYaaKYZJ32aZAudGpIal5epDyBYA==}
@@ -925,6 +957,9 @@ packages:
     resolution: {integrity: sha512-iDv3mXYo9CdxYRVwt3/pRyuk25p7Sn4GfaS/zMZyVIqTzsvKLCIIH3GdKK+ta+nsNcAVpCw/t5jFEBt1D18ctA==}
     peerDependencies:
       '@capacitor/core': '>=7.0.0'
+
+  '@capacitor/synapse@1.0.2':
+    resolution: {integrity: sha512-ynq39s4D2rhk+aVLWKfKfMCz9SHPKijL9tq8aFL5dG7ik7/+PvBHmg9cPHbqdvFEUSMmaGzL6cIjzkOruW7vGA==}
 
   '@colors/colors@1.5.0':
     resolution: {integrity: sha512-ooWCrlZP11i8GImSjTHYHLkvFDP48nS4+204nGb1RiX/WXYHmJA2III9/e2DWVabCESdW7hBAEzHRqUn9OUVvQ==}
@@ -3234,6 +3269,9 @@ packages:
 
   html-escaper@2.0.2:
     resolution: {integrity: sha512-H2iMtd0I4Mt5eYiapRdIDjp+XzelXQ0tFE4JS7YFwFevXXMmOp9myNrUvCg0D6ws8iqkRPBfKHgbwig1SmlLfg==}
+
+  html5-qrcode@2.3.8:
+    resolution: {integrity: sha512-jsr4vafJhwoLVEDW3n1KvPnCCXWaQfRng0/EEYk1vNcQGcG/htAdhJX0be8YyqMoSz7+hZvOZSTAepsabiuhiQ==}
 
   htmlparser2@10.0.0:
     resolution: {integrity: sha512-TwAZM+zE5Tq3lrEHvOlvwgj1XLWQCtaaibSN11Q+gGBAS7Y1uZSWwXXRe4iF6OXnaq1riyQAPFOBtYc77Mxq0g==}
@@ -6413,9 +6451,18 @@ snapshots:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.27.1
 
+  '@capacitor/android@7.2.0(@capacitor/core@7.2.0)':
+    dependencies:
+      '@capacitor/core': 7.2.0
+
   '@capacitor/app@7.0.1(@capacitor/core@7.2.0)':
     dependencies:
       '@capacitor/core': 7.2.0
+
+  '@capacitor/barcode-scanner@2.0.3(@capacitor/core@7.2.0)':
+    dependencies:
+      '@capacitor/core': 7.2.0
+      html5-qrcode: 2.3.8
 
   '@capacitor/cli@7.2.0':
     dependencies:
@@ -6443,6 +6490,15 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
+  '@capacitor/device@7.0.1(@capacitor/core@7.2.0)':
+    dependencies:
+      '@capacitor/core': 7.2.0
+
+  '@capacitor/geolocation@7.1.2(@capacitor/core@7.2.0)':
+    dependencies:
+      '@capacitor/core': 7.2.0
+      '@capacitor/synapse': 1.0.2
+
   '@capacitor/haptics@7.0.1(@capacitor/core@7.2.0)':
     dependencies:
       '@capacitor/core': 7.2.0
@@ -6454,6 +6510,8 @@ snapshots:
   '@capacitor/status-bar@7.0.1(@capacitor/core@7.2.0)':
     dependencies:
       '@capacitor/core': 7.2.0
+
+  '@capacitor/synapse@1.0.2': {}
 
   '@colors/colors@1.5.0': {}
 
@@ -8891,6 +8949,8 @@ snapshots:
       wbuf: 1.7.3
 
   html-escaper@2.0.2: {}
+
+  html5-qrcode@2.3.8: {}
 
   htmlparser2@10.0.0:
     dependencies:

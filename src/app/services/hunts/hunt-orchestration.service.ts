@@ -2,7 +2,7 @@
 // It handles actions like starting, completing, and skipping hunts,
 // coordinating with validation, progress, timer, and user services.
 import { Injectable, inject } from '@angular/core';
-import { Hunt, HuntProgress } from '../../models/hunt.model';
+import { HuntProgress } from '../../models/hunt.model';
 import { HuntProgressService } from './hunt-progress.service';
 import { HuntValidationService } from './hunt-validation.service';
 import { TimerService } from '../timer.service';

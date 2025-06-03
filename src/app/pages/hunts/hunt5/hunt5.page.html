@@ -1,13 +1,13 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>Final Treasure</ion-title>
+    <ion-title>Power Play</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
   <ion-header collapse="condense">
     <ion-toolbar>
-      <ion-title size="large">Final Treasure</ion-title>
+      <ion-title size="large">Power Play</ion-title>
     </ion-toolbar>
   </ion-header>
 
@@ -21,9 +21,84 @@
   }
 
   <div class="hunt-content">
-    <p>
-      Locate the final treasure! You're almost at the end of your adventure.
-    </p>
+    <div class="power-station">
+      <div
+        class="power-indicator"
+        [class.charging]="charging"
+        [class.unplugged]="!charging"
+      >
+        @if (charging) {
+          <ion-icon
+            name="battery-charging-outline"
+            class="battery-icon charging-icon"
+          ></ion-icon>
+          <div class="charging-animation">
+            <div class="lightning-bolt">⚡</div>
+          </div>
+        } @else {
+          <ion-icon
+            name="battery-dead-outline"
+            class="battery-icon dead-icon"
+          ></ion-icon>
+          <div class="pulse-ring"></div>
+        }
+      </div>
+
+      <div class="status-text">
+        @if (charging) {
+          <h2 class="charging-text">Charging Detected!</h2>
+          <p class="status-description">Great! Your device is now charging.</p>
+        } @else {
+          <h2 class="unplugged-text">Power Needed</h2>
+          <p class="status-description">Please connect your charger.</p>
+        }
+      </div>
+    </div>
+
+    <div class="instructions-card">
+      <h3>Mission Instructions</h3>
+      <div class="instruction-steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h4>Check Current Status</h4>
+            <p>See if your device is currently plugged in or not</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h4>Power Cycle</h4>
+            <p>
+              If unplugged: <strong>Plug in → Unplug → Plug in again</strong>
+            </p>
+            <p>
+              If plugged in: <strong>Unplug → Plug in → Unplug again</strong>
+            </p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h4>Feel the Vibration</h4>
+            <p>Experience haptic feedback with each power state change</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="power-stats">
+      <div class="stat-item">
+        <ion-icon name="flash-outline"></ion-icon>
+        <span>Real-time monitoring</span>
+      </div>
+      <div class="stat-item">
+        <ion-icon name="phone-portrait-outline"></ion-icon>
+        <span>Haptic feedback enabled</span>
+      </div>
+    </div>
   </div>
 
   <app-animated-action-button
