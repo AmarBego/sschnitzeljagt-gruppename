@@ -14,7 +14,6 @@ export const routes: Routes = [
     path: 'onboarding',
     loadComponent: () =>
       import('./pages/onboarding/onboarding.page').then(m => m.OnboardingPage),
-    canActivate: [onboardingGuard, dashboardGuard],
   },
   {
     path: 'dashboard',

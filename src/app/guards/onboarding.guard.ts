@@ -21,6 +21,11 @@ export const onboardingGuard: CanActivateFn = (
   const userService = inject(UserService);
   const router = inject(Router);
 
+  // If already on onboarding page, allow access regardless of setup state
+  if (state.url === '/onboarding') {
+    return true;
+  }
+
   return userService.user$.pipe(
     filter(user => user !== undefined), // Ensure user is loaded
     take(1),
