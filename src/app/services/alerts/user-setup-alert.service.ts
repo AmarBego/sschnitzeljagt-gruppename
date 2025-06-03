@@ -98,4 +98,15 @@ export class UserSetupAlertService {
       await alert.present();
     });
   }
+
+  async showErrorAlert(message: string, subHeader?: string): Promise<void> {
+    const alert = await this.alertController.create({
+      header: 'Error',
+      subHeader: subHeader || 'An Error Occurred',
+      message,
+      buttons: ['OK'],
+      backdropDismiss: false,
+    });
+    await alert.present();
+  }
 }

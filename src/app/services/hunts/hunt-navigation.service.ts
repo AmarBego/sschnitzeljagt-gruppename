@@ -2,9 +2,8 @@
 // It primarily handles ensuring the user stays on the active hunt page if they try to navigate away using the browser's back button.
 // Other route access restrictions (e.g., to /dashboard) are primarily handled by route guards like DashboardGuard.
 import { Injectable } from '@angular/core';
-import { Router, NavigationStart, Event as RouterEvent } from '@angular/router';
+import { Router } from '@angular/router';
 import { HuntService } from '../hunt.service';
-import { filter } from 'rxjs/operators';
 import { NavController } from '@ionic/angular';
 
 @Injectable({
@@ -25,15 +24,6 @@ export class HuntNavigationService {
         this.activeHuntUrl = null;
       }
     });
-
-    // Intercept navigation attempts, specifically for browser back button
-    this.router.events.pipe(
-      filter(
-        (event: RouterEvent): event is NavigationStart =>
-          event instanceof NavigationStart &&
-          event.navigationTrigger === 'popstate'
-      )
-    );
   }
 
   // canDeactivateHuntPage can still be useful for CanDeactivate guards on hunt pages themselves,

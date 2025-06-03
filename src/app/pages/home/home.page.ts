@@ -5,7 +5,6 @@ import {
   IonTitle,
   IonContent,
 } from '@ionic/angular/standalone';
-import { OnboardingService } from '../../services/onboarding.service';
 
 @Component({
   selector: 'app-home',
@@ -14,10 +13,10 @@ import { OnboardingService } from '../../services/onboarding.service';
   imports: [IonHeader, IonToolbar, IonTitle, IonContent],
 })
 export class HomePage implements OnInit {
-  constructor(private onboardingService: OnboardingService) {}
+  constructor() {}
 
   async ngOnInit(): Promise<void> {
-    // Start onboarding flow when home page loads
-    await this.onboardingService.startOnboardingFlow();
+    // Start onboarding flow when home page loads -- THIS LOGIC IS BEING MOVED TO ONBOARDING.PAGE.TS
+    // await this.onboardingService.startOnboardingFlow(); // Removed call
   }
 }
