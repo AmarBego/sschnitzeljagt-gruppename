@@ -28,6 +28,7 @@ export class OnboardingService {
       );
     }
   }
+
   private async handleNewUser(): Promise<void> {
     const userName = await this.alertService.showWelcomeAlert();
     if (!userName) {

@@ -11,9 +11,11 @@ import {
   close,
   bulbOutline,
   timeOutline,
+  batteryDeadOutline,
+  batteryChargingOutline,
 } from 'ionicons/icons';
 import { HuntService } from './services/hunt.service';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject } from 'rxjs';
 import { StatusBarService } from './services/status-bar.service';
 
 @Component({
@@ -38,6 +40,8 @@ export class AppComponent implements OnInit, OnDestroy {
       close,
       bulbOutline,
       timeOutline,
+      batteryDeadOutline,
+      batteryChargingOutline,
     });
   }
 
