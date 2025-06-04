@@ -20,14 +20,16 @@
     </app-hunt-timer>
   }
 
-  <ng-template #inactiveHunt>
-    <div class="hunt-content">
-      <p>
-        Claim your ultimate prize! You've reached the end of your treasure hunt
-        adventure!
-      </p>
-    </div>
-  </ng-template>
+  <div class="hunt-content">
+    @if (!wificontected && checkStarted === true) {
+      <ion-label>Please conect to Wifi</ion-label>
+    } @else {
+      <ion-label>Please Disconect Form Wifi</ion-label>
+    }
+    @if (!checkStarted) {
+    <ion-button (click)="statrtCheckingConection()"> Start Check</ion-button>
+    }
+  </div>
 
   <app-animated-action-button
     [availableStates]="actionButtonConfig.availableStates"
