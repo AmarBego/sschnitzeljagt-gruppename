@@ -9,15 +9,14 @@ export const INITIAL_HUNTS: Hunt[] = [
     isUnlocked: true,
     maxDuration: 300,
   }, // 5 minutes
-  /* {
-    id: 2,
-    title: 'Walk the walk',
-    description: 'Walk a certain distance',
-    isCompleted: false,
-    isUnlocked: false,
-    maxDuration: 240,
-  }, */
-  // 4 minutes
+  // {
+  //   id: 2,
+  //   title: 'Walk the walk',
+  //   description: 'Walk a certain distance',
+  //   isCompleted: false,
+  //   isUnlocked: false,
+  //   maxDuration: 240,
+  // }, // 4 minutes
   {
     id: 2,
     title: 'Scan the truth',
@@ -26,15 +25,14 @@ export const INITIAL_HUNTS: Hunt[] = [
     isUnlocked: false,
     maxDuration: 120,
   }, // 2 minutes
-  /*{
-  id: 4,
-  title: 'Do a barrel roll',
-  description: 'Rotate the phone to the correct angle',
-  isCompleted: false,
-  isUnlocked: false,
-    maxDuration: 30,
-  }, // 0.5 minutes
-  */
+  // {
+  //   id: 4,
+  //   title: 'Do a barrel roll',
+  //   description: 'Rotate the phone to the correct angle',
+  //   isCompleted: false,
+  //   isUnlocked: false,
+  //   maxDuration: 30,
+  // }, // 0.5 minutes
   {
     id: 3,
     title: 'Power Play',

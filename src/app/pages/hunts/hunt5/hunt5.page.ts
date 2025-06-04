@@ -25,7 +25,7 @@ import { Haptics, ImpactStyle } from '@capacitor/haptics';
 })
 export class Hunt5Page extends BaseHuntPage implements OnInit, OnDestroy {
   override get huntId(): number {
-    return 5;
+    return 3;
   }
 
   charging: boolean | undefined = false;

@@ -24,7 +24,7 @@ import { Network, ConnectionStatus } from '@capacitor/network';
 })
 export class Hunt6Page extends BaseHuntPage implements OnInit, OnDestroy {
   override get huntId(): number {
-    return 6;
+    return 4;
   }
   private wifiState: ConnectionStatus | null = null;
   protected wificontected: boolean = false;
