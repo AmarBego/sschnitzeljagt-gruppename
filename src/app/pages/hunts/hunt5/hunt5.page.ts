@@ -7,6 +7,7 @@ import { HuntTimerComponent } from '../../../shared/components/hunt-timer/hunt-t
 import { HuntPageHelper } from '../../../shared/utils/hunt-page.helper';
 import { BaseHuntPage } from '../../../shared/utils/base-hunt.page';
 import { Device } from '@capacitor/device';
+
 @Component({
   selector: 'app-hunt5',
   templateUrl: './hunt5.page.html',
