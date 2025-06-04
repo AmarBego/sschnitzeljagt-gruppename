@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Capacitor } from '@capacitor/core';
+import { Geolocation } from '@capacitor/geolocation';
 
 @Injectable({
   providedIn: 'root',
@@ -7,11 +8,15 @@ import { Capacitor } from '@capacitor/core';
 export class PermissionService {
   async requestLocationPermission(): Promise<boolean> {
     return Capacitor.isNativePlatform()
-      ? this.requestWebLocationPermission() // Will be enhanced for native later
+      ? this.requestNativeLocationPermission()
       : this.requestWebLocationPermission();
   }
 
   async checkLocationPermission(): Promise<boolean> {
+    if (Capacitor.isNativePlatform()) {
+      return this.checkNativeLocationPermission();
+    }
+
     if (!navigator.permissions) return false;
 
     try {
@@ -20,6 +25,39 @@ export class PermissionService {
       });
       return result.state === 'granted';
     } catch {
+      return false;
+    }
+  }
+  private async requestNativeLocationPermission(): Promise<boolean> {
+    try {
+      // First check current permission status
+      const currentPermissions = await Geolocation.checkPermissions();
+
+      if (currentPermissions.location === 'granted') {
+        return true;
+      }
+
+      // Request permissions
+      const permissions = await Geolocation.requestPermissions();
+      const isGranted = permissions.location === 'granted';
+
+      if (!isGranted) {
+        console.log('Location permission denied by user');
+      }
+
+      return isGranted;
+    } catch (error) {
+      console.error('Error requesting native location permission:', error);
+      return false;
+    }
+  }
+
+  private async checkNativeLocationPermission(): Promise<boolean> {
+    try {
+      const permissions = await Geolocation.checkPermissions();
+      return permissions.location === 'granted';
+    } catch (error) {
+      console.error('Error checking native location permission:', error);
       return false;
     }
   }

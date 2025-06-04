@@ -14,6 +14,7 @@ import {
 } from 'ionicons/icons';
 import { HuntService } from './services/hunt.service';
 import { Subject, takeUntil } from 'rxjs';
+import { StatusBarService } from './services/status-bar.service';
 
 @Component({
   selector: 'app-root',
@@ -23,6 +24,7 @@ import { Subject, takeUntil } from 'rxjs';
 export class AppComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private huntService = inject(HuntService);
+  private statusBarService = inject(StatusBarService);
   private appHiddenTime?: Date;
 
   constructor() {
@@ -39,7 +41,9 @@ export class AppComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnInit() {
+  async ngOnInit() {
+    // Configure status bar for fullscreen experience
+    await this.statusBarService.configureStatusBar();
     // Listen for app visibility changes
     this.setupAppLifecycleListeners();
   }
