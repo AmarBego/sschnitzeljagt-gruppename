@@ -6,9 +6,9 @@ import { huntPageGuard } from './guards/hunt-page.guard';
 
 export const routes: Routes = [
   {
-    path: 'home',
-    loadComponent: () => import('./pages/home/home.page').then(m => m.HomePage),
-    canActivate: [onboardingGuard, dashboardGuard],
+    path: '',
+    redirectTo: 'onboarding',
+    pathMatch: 'full',
   },
   {
     path: 'onboarding',
@@ -20,11 +20,6 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/dashboard/dashboard.page').then(m => m.DashboardPage),
     canActivate: [onboardingGuard, dashboardGuard],
-  },
-  {
-    path: '',
-    redirectTo: 'home',
-    pathMatch: 'full',
   },
   {
     path: 'hunt1',
