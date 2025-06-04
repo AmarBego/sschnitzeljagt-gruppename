@@ -1,0 +1,18 @@
+<div class="timer-container" [class.overdue]="isOverdue">
+  <div class="timer-display">
+    <div class="timer-main">
+      <ion-icon name="time-outline" class="timer-icon"></ion-icon>
+      <span class="timer-text">{{ formatTime(timer) }}</span>
+    </div>
+    @if (hunt && hunt.maxDuration) {
+      <div class="max-duration">Max: {{ formatTime(hunt.maxDuration) }}</div>
+    }
+  </div>
+
+  @if (isOverdue) {
+    <div class="overdue-indicator">
+      <ion-icon name="warning" class="warning-icon"></ion-icon>
+      <span>Time exceeded!</span>
+    </div>
+  }
+</div>
