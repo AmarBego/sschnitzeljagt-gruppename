@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule, ModalController } from '@ionic/angular';
-import { Hunt } from '../../models/hunt.model';
+import { Hunt } from '../../../models/hunt.model';
 
 @Component({
   selector: 'app-hunt-stats-modal',

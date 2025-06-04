@@ -1,7 +1,9 @@
 .indicator {
   &.scan-to-start,
-  &.scan-error {
+  &.scan-error,
+  &.scan-success {
     animation: power-glow 2s ease-in-out infinite alternate;
+
     .status-icon {
       color: var(--ion-color-white);
       font-size: 64px;

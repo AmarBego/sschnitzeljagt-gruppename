@@ -10,7 +10,7 @@ import { IONIC_COMPONENTS } from '../../shared/utils/ionic.utils';
 import { HuntNavigationService } from '../../services/hunts/hunt-navigation.service'; // Added import
 import { AnimatedActionButtonComponent } from '../../shared/components/animated-action-button/animated-action-button.component';
 import { ModalController } from '@ionic/angular/standalone';
-import { HuntStatsModalPage } from '../../modals/hunt-stats-modal/hunt-stats-modal.page';
+import { HuntStatsModalPage } from '../../shared/components/hunt-stats-modal/hunt-stats-modal.page';
 
 @Component({
   selector: 'app-dashboard',

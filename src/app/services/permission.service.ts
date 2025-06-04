@@ -91,12 +91,18 @@ export class PermissionService {
   }
 
   private async requestWebCameraPermission(): Promise<boolean> {
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      console.warn('Camera API not available in this browser.');
-      return false;
-    }
-
     try {
+      // Check if mediaDevices and getUserMedia are available
+      if (
+        !navigator.mediaDevices ||
+        typeof navigator.mediaDevices.getUserMedia !== 'function'
+      ) {
+        console.warn(
+          'Camera API not available in this browser or environment.'
+        );
+        return false;
+      }
+
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
       // Stop the tracks to release the camera
       stream.getTracks().forEach(track => track.stop());
