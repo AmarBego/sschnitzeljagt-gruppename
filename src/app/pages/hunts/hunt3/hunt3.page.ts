@@ -6,7 +6,11 @@ import { AnimatedActionButtonComponent } from '../../../shared/components/animat
 import { HuntTimerComponent } from '../../../shared/components/hunt-timer/hunt-timer.component';
 import { HuntPageHelper } from '../../../shared/utils/hunt-page.helper';
 import { BaseHuntPage } from '../../../shared/utils/base-hunt.page';
-import { barcodeScannerCss } from '@capacitor/barcode-scanner/dist/esm/utils';
+import {
+  CapacitorBarcodeScanner,
+  CapacitorBarcodeScannerOptions,
+  CapacitorBarcodeScannerTypeHintALLOption,
+} from '@capacitor/barcode-scanner';
 
 @Component({
   selector: 'app-hunt3',
@@ -26,7 +30,7 @@ export class Hunt3Page extends BaseHuntPage {
   override get huntId(): number {
     return 3;
   }
-
+  scanResult: string | undefined;
   async scanBarcode(): Promise<void> {
     // Definiere die Optionen für den Scanner
     const options: CapacitorBarcodeScannerOptions = {
@@ -35,27 +39,20 @@ export class Hunt3Page extends BaseHuntPage {
     };
 
     try {
-      // Überprüfe Kameraberechtigung
-      await CapacitorBarcodeScanner.checkPermission({ force: true });
-
-      // Verstecke den Hintergrund für den Scanner
-      CapacitorBarcodeScanner.hideBackground();
-
       // Starte den Scan
       const result = await CapacitorBarcodeScanner.scanBarcode(options);
 
       // Speichere das Ergebnis
-      this.barcodeResult = result.ScanResult;
-
+      this.scanResult = result.ScanResult;
+      if (this.scanResult === 'M335@ICT-BZ') {
+        //Hier ist das richtige result
+        console.log('richtigBarcode-Daten:', this.scanResult); //kamera brucht noch zustimmung
+      } else {
+        console.log('Barcode-Datenfalsch:', this.scanResult);
+      }
       // Zeige das Ergebnis in der Konsole
-      console.log('Barcode-Daten:', this.barcodeResult);
-
-      // Zeige den Hintergrund wieder an
-      CapacitorBarcodeScanner.showBackground();
     } catch (error) {
-      console.error('Fehler beim Scannen:', error);
-      // Zeige den Hintergrund wieder an, falls ein Fehler auftritt
-      CapacitorBarcodeScanner.showBackground();
+      console.log('Barcode-Daten:', this.scanResult);
     }
   }
 }
