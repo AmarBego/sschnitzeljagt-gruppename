@@ -38,9 +38,15 @@ importers:
       '@capacitor/app':
         specifier: 7.0.1
         version: 7.0.1(@capacitor/core@7.2.0)
+      '@capacitor/barcode-scanner':
+        specifier: ^2.0.3
+        version: 2.0.3(@capacitor/core@7.2.0)
       '@capacitor/core':
         specifier: 7.2.0
         version: 7.2.0
+      '@capacitor/device':
+        specifier: ^7.0.1
+        version: 7.0.1(@capacitor/core@7.2.0)
       '@capacitor/geolocation':
         specifier: ^7.1.2
         version: 7.1.2(@capacitor/core@7.2.0)
@@ -914,6 +920,11 @@ packages:
     peerDependencies:
       '@capacitor/core': '>=7.0.0'
 
+  '@capacitor/barcode-scanner@2.0.3':
+    resolution: {integrity: sha512-ZELdXMRR1fgCWDVbSJtmaEtQeWFknYq09hxJuFyyzqvd31OsexJLMKMFmlq9N+NMEW8jwHaWKa08GlEIxyjzOw==}
+    peerDependencies:
+      '@capacitor/core': '>=7.0.0'
+
   '@capacitor/cli@7.2.0':
     resolution: {integrity: sha512-RNW9vtYYYSDmOdguYBSW0VpRnG/d6lGydlc9DLrJ7qbSPxFrotTz9IjkM48O+SruUma61DyuSqJttdbay2xSxg==}
     engines: {node: '>=20.0.0'}
@@ -921,6 +932,11 @@ packages:
 
   '@capacitor/core@7.2.0':
     resolution: {integrity: sha512-2zCnA6RJeZ9ec4470o8QMZEQTWpekw9FNoqm5TLc10jeCrhvHVI8MPgxdZVc3mOdFlyieYu4AS1fNxSqbS57Pw==}
+
+  '@capacitor/device@7.0.1':
+    resolution: {integrity: sha512-ImjR2LmCEhbckYtOHXTfi5v6B7d4HPX9uKIAQs7wzzmE+yRRXuUTEzARBQ00dZDInAInkbuyQRdjwPTSHZUpnw==}
+    peerDependencies:
+      '@capacitor/core': '>=7.0.0'
 
   '@capacitor/geolocation@7.1.2':
     resolution: {integrity: sha512-J++OuOpn6Bjweo7SZ+jwI/dhVF9DNw6Wx0UHgQ4qfrATqmNKGNZ/BUljGhXiKJceSx2GIhfrYS7BYqo3uWibgQ==}
@@ -3253,6 +3269,9 @@ packages:
 
   html-escaper@2.0.2:
     resolution: {integrity: sha512-H2iMtd0I4Mt5eYiapRdIDjp+XzelXQ0tFE4JS7YFwFevXXMmOp9myNrUvCg0D6ws8iqkRPBfKHgbwig1SmlLfg==}
+
+  html5-qrcode@2.3.8:
+    resolution: {integrity: sha512-jsr4vafJhwoLVEDW3n1KvPnCCXWaQfRng0/EEYk1vNcQGcG/htAdhJX0be8YyqMoSz7+hZvOZSTAepsabiuhiQ==}
 
   htmlparser2@10.0.0:
     resolution: {integrity: sha512-TwAZM+zE5Tq3lrEHvOlvwgj1XLWQCtaaibSN11Q+gGBAS7Y1uZSWwXXRe4iF6OXnaq1riyQAPFOBtYc77Mxq0g==}
@@ -6440,6 +6459,11 @@ snapshots:
     dependencies:
       '@capacitor/core': 7.2.0
 
+  '@capacitor/barcode-scanner@2.0.3(@capacitor/core@7.2.0)':
+    dependencies:
+      '@capacitor/core': 7.2.0
+      html5-qrcode: 2.3.8
+
   '@capacitor/cli@7.2.0':
     dependencies:
       '@ionic/cli-framework-output': 2.2.8
@@ -6465,6 +6489,10 @@ snapshots:
   '@capacitor/core@7.2.0':
     dependencies:
       tslib: 2.8.1
+
+  '@capacitor/device@7.0.1(@capacitor/core@7.2.0)':
+    dependencies:
+      '@capacitor/core': 7.2.0
 
   '@capacitor/geolocation@7.1.2(@capacitor/core@7.2.0)':
     dependencies:
@@ -8921,6 +8949,8 @@ snapshots:
       wbuf: 1.7.3
 
   html-escaper@2.0.2: {}
+
+  html5-qrcode@2.3.8: {}
 
   htmlparser2@10.0.0:
     dependencies:

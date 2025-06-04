@@ -11,6 +11,8 @@ import {
   close,
   bulbOutline,
   timeOutline,
+  checkmarkCircleOutline,
+  warningOutline,
   batteryDeadOutline,
   batteryChargingOutline,
 } from 'ionicons/icons';
@@ -40,14 +42,14 @@ export class AppComponent implements OnInit, OnDestroy {
       close,
       bulbOutline,
       timeOutline,
+      checkmarkCircleOutline,
+      warningOutline,
       batteryDeadOutline,
       batteryChargingOutline,
     });
   }
 
   async ngOnInit() {
-    // Configure status bar for fullscreen experience
-    await this.statusBarService.configureStatusBar();
     // Listen for app visibility changes
     this.setupAppLifecycleListeners();
   }
