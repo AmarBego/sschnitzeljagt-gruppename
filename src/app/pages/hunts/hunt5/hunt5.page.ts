@@ -4,7 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { IONIC_COMPONENTS } from '../../../shared/utils/ionic.utils';
 import { AnimatedActionButtonComponent } from '../../../shared/components/animated-action-button/animated-action-button.component';
 import { HuntTimerComponent } from '../../../shared/components/hunt-timer/hunt-timer.component';
-import { HuntPageHelper } from '../../../shared/utils/hunt-page.helper';
 import { BaseHuntPage } from '../../../shared/utils/base-hunt.page';
 import { Device } from '@capacitor/device';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
@@ -21,7 +20,6 @@ import { Haptics, ImpactStyle } from '@capacitor/haptics';
     AnimatedActionButtonComponent,
     HuntTimerComponent,
   ],
-  providers: [HuntPageHelper],
 })
 export class Hunt5Page extends BaseHuntPage implements OnInit, OnDestroy {
   override get huntId(): number {
@@ -38,7 +36,6 @@ export class Hunt5Page extends BaseHuntPage implements OnInit, OnDestroy {
 
   override ngOnInit(): void {
     super.ngOnInit();
-    this.huntHelper.setTaskCompletedCondition(false);
     this.taskCompletionNotified = false;
     this.powerCycleProgress = 0;
     this.initialDeviceChargingState = undefined;
@@ -167,7 +164,7 @@ export class Hunt5Page extends BaseHuntPage implements OnInit, OnDestroy {
 
         if (this.powerCycleProgress === 3 && !this.taskCompletionNotified) {
           console.log('Hunt 5: Power cycle fully completed!');
-          this.huntHelper.setTaskCompletedCondition(true);
+          this._onTaskConditionMet();
           this.taskCompletionNotified = true;
           Haptics.impact({ style: ImpactStyle.Heavy }).catch(err =>
             console.error('Haptic error', err)

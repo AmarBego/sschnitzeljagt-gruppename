@@ -4,7 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { IONIC_COMPONENTS } from '../../../shared/utils/ionic.utils';
 import { AnimatedActionButtonComponent } from '../../../shared/components/animated-action-button/animated-action-button.component';
 import { HuntTimerComponent } from '../../../shared/components/hunt-timer/hunt-timer.component';
-import { HuntPageHelper } from '../../../shared/utils/hunt-page.helper';
 import { BaseHuntPage } from '../../../shared/utils/base-hunt.page';
 import { Network, ConnectionStatus } from '@capacitor/network';
 
@@ -20,7 +19,6 @@ import { Network, ConnectionStatus } from '@capacitor/network';
     AnimatedActionButtonComponent,
     HuntTimerComponent,
   ],
-  providers: [HuntPageHelper],
 })
 export class Hunt6Page extends BaseHuntPage implements OnInit, OnDestroy {
   override get huntId(): number {
@@ -32,6 +30,16 @@ export class Hunt6Page extends BaseHuntPage implements OnInit, OnDestroy {
   protected passConditon2: boolean = false;
   private intervalId: any;
   protected checkStarted: boolean = false;
+
+  override ngOnInit(): void {
+    super.ngOnInit();
+  }
+
+  override ngOnDestroy(): void {
+    super.ngOnDestroy();
+    this.stopCheckingWifi();
+  }
+
   protected statrtCheckingConection(): void {
     // Start checking Wi-Fi state every 1 second
     this.checkStarted = true;
@@ -66,8 +74,8 @@ export class Hunt6Page extends BaseHuntPage implements OnInit, OnDestroy {
       }
       if (this.passConditon2 === true && this.passConditon1) {
         this.stopCheckingWifi();
-        console.log('successful');
-        ///hier Sucsess logik
+        console.log('Hunt 6: WiFi sequence successful (Page Logic)');
+        this._onTaskConditionMet();
       }
       return this.wifiState;
     } catch (error) {

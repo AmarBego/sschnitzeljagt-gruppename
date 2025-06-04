@@ -5,7 +5,6 @@ import { IONIC_COMPONENTS } from '../../../shared/utils/ionic.utils';
 import { Geolocation, Position } from '@capacitor/geolocation';
 import { AnimatedActionButtonComponent } from '../../../shared/components/animated-action-button/animated-action-button.component';
 import { HuntTimerComponent } from '../../../shared/components/hunt-timer/hunt-timer.component';
-import { HuntPageHelper } from '../../../shared/utils/hunt-page.helper';
 import { BaseHuntPage } from '../../../shared/utils/base-hunt.page';
 
 @Component({
@@ -20,7 +19,6 @@ import { BaseHuntPage } from '../../../shared/utils/base-hunt.page';
     AnimatedActionButtonComponent,
     HuntTimerComponent,
   ],
-  providers: [HuntPageHelper],
 })
 export class Hunt1Page extends BaseHuntPage implements OnInit, OnDestroy {
   override get huntId(): number {
@@ -39,7 +37,6 @@ export class Hunt1Page extends BaseHuntPage implements OnInit, OnDestroy {
 
   override ngOnInit(): void {
     super.ngOnInit();
-    this.huntHelper.setTaskCompletedCondition(false);
     this.taskCompletedNotified = false;
     this.startTracking();
   }
@@ -86,7 +83,7 @@ export class Hunt1Page extends BaseHuntPage implements OnInit, OnDestroy {
 
       if (this.distanceToPoint < 5 && !this.taskCompletedNotified) {
         console.log('Hunt 1: Location target reached!');
-        this.huntHelper.setTaskCompletedCondition(true);
+        this._onTaskConditionMet();
         this.taskCompletedNotified = true;
         this.stopTracking();
       }

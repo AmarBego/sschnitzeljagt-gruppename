@@ -4,7 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { IONIC_COMPONENTS } from '../../../shared/utils/ionic.utils';
 import { AnimatedActionButtonComponent } from '../../../shared/components/animated-action-button/animated-action-button.component';
 import { HuntTimerComponent } from '../../../shared/components/hunt-timer/hunt-timer.component';
-import { HuntPageHelper } from '../../../shared/utils/hunt-page.helper';
 import { BaseHuntPage } from '../../../shared/utils/base-hunt.page';
 import {
   CapacitorBarcodeScanner,
@@ -24,7 +23,6 @@ import {
     AnimatedActionButtonComponent,
     HuntTimerComponent,
   ],
-  providers: [HuntPageHelper],
 })
 export class Hunt3Page extends BaseHuntPage implements OnInit, OnDestroy {
   override get huntId(): number {
@@ -39,7 +37,6 @@ export class Hunt3Page extends BaseHuntPage implements OnInit, OnDestroy {
 
   override ngOnInit(): void {
     super.ngOnInit();
-    this.huntHelper.setTaskCompletedCondition(false);
     this.resetScanState();
   }
 
@@ -84,7 +81,7 @@ export class Hunt3Page extends BaseHuntPage implements OnInit, OnDestroy {
               'Hunt 3 (Barcode): Correct barcode scanned!',
               this.scanResult
             );
-            this.huntHelper.setTaskCompletedCondition(true);
+            this._onTaskConditionMet();
             this.taskCompletedNotified = true;
             this.isScanSuccessful = true;
             this.errorMessage = null;
