@@ -6,11 +6,15 @@ import { IONIC_COMPONENTS } from '../../utils/ionic.utils';
 @Component({
   selector: 'app-hunt-timer',
   template: `
-    <div class="timer-container" [class.overdue]="isOverdue">
+    <div
+      class="timer-container"
+      [class.overdue]="isOverdue"
+      [class.completed]="completionTime !== null"
+    >
       <div class="timer-display">
         <div class="timer-main">
           <ion-icon name="time-outline" class="timer-icon"></ion-icon>
-          <span class="timer-text">{{ formatTime(timer) }}</span>
+          <span class="timer-text">{{ formatTime(displayTime) }}</span>
         </div>
         @if (hunt && hunt.maxDuration) {
           <div class="max-duration">
@@ -23,6 +27,16 @@ import { IONIC_COMPONENTS } from '../../utils/ionic.utils';
         <div class="overdue-indicator">
           <ion-icon name="warning" class="warning-icon"></ion-icon>
           <span>Time exceeded!</span>
+        </div>
+      }
+
+      @if (completionTime !== null) {
+        <div class="completion-indicator">
+          <ion-icon
+            name="checkmark-done-outline"
+            class="success-icon"
+          ></ion-icon>
+          <span>Task completed!</span>
         </div>
       }
     </div>
@@ -41,6 +55,10 @@ import { IONIC_COMPONENTS } from '../../utils/ionic.utils';
       .timer-container.overdue {
         border-color: var(--ion-color-danger);
         animation: pulse 2s infinite;
+      }
+
+      .timer-container.completed {
+        border-color: var(--ion-color-success);
       }
 
       @keyframes pulse {
@@ -96,6 +114,10 @@ import { IONIC_COMPONENTS } from '../../utils/ionic.utils';
         color: var(--ion-color-danger);
       }
 
+      .timer-container.completed .timer-icon {
+        color: var(--ion-color-success);
+      }
+
       .timer-text {
         font-family: 'Courier New', monospace;
         font-size: 28px;
@@ -104,6 +126,10 @@ import { IONIC_COMPONENTS } from '../../utils/ionic.utils';
       }
       .timer-container.overdue .timer-text {
         color: var(--ion-color-danger);
+      }
+
+      .timer-container.completed .timer-text {
+        color: var(--ion-color-success);
       }
 
       .overdue-indicator {
@@ -115,6 +141,16 @@ import { IONIC_COMPONENTS } from '../../utils/ionic.utils';
         font-weight: bold;
         margin-top: 8px;
         animation: blink 1s infinite;
+      }
+
+      .completion-indicator {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        color: var(--ion-color-success);
+        font-weight: bold;
+        margin-top: 8px;
       }
 
       @keyframes blink {
@@ -131,6 +167,10 @@ import { IONIC_COMPONENTS } from '../../utils/ionic.utils';
       .warning-icon {
         font-size: 16px;
       }
+
+      .success-icon {
+        font-size: 16px;
+      }
     `,
   ],
   imports: [CommonModule, ...IONIC_COMPONENTS],
@@ -139,6 +179,11 @@ export class HuntTimerComponent {
   @Input() timer: number = 0;
   @Input() hunt?: Hunt;
   @Input() isOverdue: boolean = false;
+  @Input() completionTime: number | null = null;
+
+  get displayTime(): number {
+    return this.completionTime !== null ? this.completionTime : this.timer;
+  }
 
   formatTime(seconds: number): string {
     const mins = Math.floor(seconds / 60);

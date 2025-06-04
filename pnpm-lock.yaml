@@ -41,6 +41,9 @@ importers:
       '@capacitor/barcode-scanner':
         specifier: ^2.0.3
         version: 2.0.3(@capacitor/core@7.2.0)
+      '@capacitor/camera':
+        specifier: ^7.0.1
+        version: 7.0.1(@capacitor/core@7.2.0)
       '@capacitor/core':
         specifier: 7.2.0
         version: 7.2.0
@@ -925,6 +928,11 @@ packages:
 
   '@capacitor/barcode-scanner@2.0.3':
     resolution: {integrity: sha512-ZELdXMRR1fgCWDVbSJtmaEtQeWFknYq09hxJuFyyzqvd31OsexJLMKMFmlq9N+NMEW8jwHaWKa08GlEIxyjzOw==}
+    peerDependencies:
+      '@capacitor/core': '>=7.0.0'
+
+  '@capacitor/camera@7.0.1':
+    resolution: {integrity: sha512-gDUFsYlhMra5VVOa4iJV6+MQRhp3VXpTLQY4JDATj7UvoZ8Hv4DG8qplPL9ufUFNoR3QbDDnf8+gbQOsKdkDjg==}
     peerDependencies:
       '@capacitor/core': '>=7.0.0'
 
@@ -6471,6 +6479,10 @@ snapshots:
     dependencies:
       '@capacitor/core': 7.2.0
       html5-qrcode: 2.3.8
+
+  '@capacitor/camera@7.0.1(@capacitor/core@7.2.0)':
+    dependencies:
+      '@capacitor/core': 7.2.0
 
   '@capacitor/cli@7.2.0':
     dependencies:

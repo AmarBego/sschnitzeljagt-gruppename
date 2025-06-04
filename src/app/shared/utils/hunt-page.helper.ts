@@ -31,7 +31,12 @@ export class HuntPageHelper implements OnDestroy {
   private readonly destroy$ = new Subject<void>();
 
   // New BehaviorSubject to track if task-specific completion condition is met
-  private taskSpecificConditionMet = new BehaviorSubject<boolean>(false);
+  private readonly taskSpecificConditionMet = new BehaviorSubject<boolean>(
+    false
+  );
+
+  // Add a variable to store the completion time
+  private taskCompletionTime: number = 0;
 
   private currentHuntId?: number;
   private huntPageData: HuntPageData = {
@@ -47,6 +52,7 @@ export class HuntPageHelper implements OnDestroy {
   ): void {
     this.currentHuntId = huntId;
     this.taskSpecificConditionMet.next(false); // Reset for the new hunt being initialized
+    this.taskCompletionTime = 0; // Reset completion time
 
     // Subscribe to hunt progress changes
     this.huntService.progress$
@@ -127,7 +133,15 @@ export class HuntPageHelper implements OnDestroy {
         },
         complete: async () => {
           if (this.currentHuntId) {
-            await this.huntService.completeHunt(this.currentHuntId);
+            // If we have a saved completion time, use it when completing the hunt
+            if (this.taskCompletionTime > 0) {
+              await this.huntService.completeHunt(
+                this.currentHuntId,
+                this.taskCompletionTime
+              );
+            } else {
+              await this.huntService.completeHunt(this.currentHuntId);
+            }
           }
         },
       },
@@ -159,10 +173,31 @@ export class HuntPageHelper implements OnDestroy {
   // Public method for hunt pages to set the condition
   setTaskCompletedCondition(isMet: boolean): void {
     this.taskSpecificConditionMet.next(isMet);
+
+    // When the task is completed, store the current timer value
+    if (isMet && this.taskCompletionTime === 0) {
+      this.taskCompletionTime = this.huntPageData.timer;
+      console.log(
+        `Hunt ${this.currentHuntId}: Task completed at ${this.taskCompletionTime} seconds`
+      );
+
+      // Update the hunt with duration in the service without completing it
+      if (this.currentHuntId) {
+        this.huntService.saveHuntDuration(
+          this.currentHuntId,
+          this.taskCompletionTime
+        );
+      }
+    }
   }
 
   // Format timer display
   formatTime(seconds: number): string {
+    // If task is completed, use completion time instead of current timer
+    if (this.taskSpecificConditionMet.value && this.taskCompletionTime > 0) {
+      seconds = this.taskCompletionTime;
+    }
+
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
@@ -185,6 +220,15 @@ export class HuntPageHelper implements OnDestroy {
   getRemainingTime(hunt?: Hunt): number | null {
     if (!hunt || !hunt.maxDuration) return null;
     return Math.max(0, hunt.maxDuration - this.huntPageData.timer);
+  }
+
+  // Add getters to expose completion state and time
+  get isTaskCompleted(): boolean {
+    return this.taskSpecificConditionMet.value;
+  }
+
+  get completionTime(): number {
+    return this.taskCompletionTime;
   }
 
   ngOnDestroy(): void {

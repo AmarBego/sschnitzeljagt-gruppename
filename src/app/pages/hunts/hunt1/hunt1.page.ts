@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IONIC_COMPONENTS } from '../../../shared/utils/ionic.utils';
@@ -22,7 +22,7 @@ import { BaseHuntPage } from '../../../shared/utils/base-hunt.page';
   ],
   providers: [HuntPageHelper],
 })
-export class Hunt1Page extends BaseHuntPage {
+export class Hunt1Page extends BaseHuntPage implements OnInit, OnDestroy {
   override get huntId(): number {
     return 1;
   }
@@ -35,17 +35,27 @@ export class Hunt1Page extends BaseHuntPage {
   public errorMessage: string | null = null;
   public tracking: boolean = false;
   private locationInterval: any = null;
+  private taskCompletedNotified = false;
 
-  constructor(private huntPageHelper: HuntPageHelper) {
-    super();
+  override ngOnInit(): void {
+    super.ngOnInit();
+    this.huntHelper.setTaskCompletedCondition(false);
+    this.taskCompletedNotified = false;
+    this.startTracking();
   }
+
+  override ngOnDestroy(): void {
+    super.ngOnDestroy();
+    this.stopTracking();
+  }
+
   startTracking() {
-    if (this.tracking) return; // Prevent multiple intervals
+    if (this.tracking) return;
     this.tracking = true;
     this.getUserLocation();
     this.locationInterval = setInterval(() => {
       this.getUserLocation();
-    }, 1000); // Update every 1 second
+    }, 1000);
   }
 
   stopTracking() {
@@ -55,9 +65,9 @@ export class Hunt1Page extends BaseHuntPage {
       this.tracking = false;
     }
   }
+
   private async getUserLocation() {
     try {
-      // Get current position
       const position: Position = await Geolocation.getCurrentPosition({
         enableHighAccuracy: true,
         timeout: 10000,
@@ -69,29 +79,30 @@ export class Hunt1Page extends BaseHuntPage {
         longitude: position.coords.longitude,
       };
 
-      // Calculate distance to predefined point
       this.distanceToPoint = this.haversineDistance(
         this.userLocation,
         this.predefinedPoint
       );
-      if (this.distanceToPoint < 5) {
-        console.log('Made it!');
+
+      if (this.distanceToPoint < 5 && !this.taskCompletedNotified) {
+        console.log('Hunt 1: Location target reached!');
+        this.huntHelper.setTaskCompletedCondition(true);
+        this.taskCompletedNotified = true;
         this.stopTracking();
       }
       this.errorMessage = null;
     } catch (error) {
-      this.errorMessage = 'Error getting location: ';
+      this.errorMessage = 'Error getting location. Please check your settings.';
       this.userLocation = null;
       this.distanceToPoint = null;
     }
   }
 
-  // Haversine distance function
   private haversineDistance(
     coords1: { latitude: number; longitude: number },
     coords2: { latitude: number; longitude: number }
   ): number {
-    const R = 6378137; // Earth's radius in meters
+    const R = 6378137;
     const lat1Rad = coords1.latitude * (Math.PI / 180);
     const lat2Rad = coords2.latitude * (Math.PI / 180);
     const deltaLat = (coords2.latitude - coords1.latitude) * (Math.PI / 180);
@@ -108,6 +119,6 @@ export class Hunt1Page extends BaseHuntPage {
 
     const distance = R * c;
 
-    return distance; // in meters
+    return distance;
   }
 }

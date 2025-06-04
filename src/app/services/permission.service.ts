@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Capacitor } from '@capacitor/core';
 import { Geolocation } from '@capacitor/geolocation';
+import { Camera } from '@capacitor/camera';
 
 @Injectable({
   providedIn: 'root',
@@ -12,22 +13,34 @@ export class PermissionService {
       : this.requestWebLocationPermission();
   }
 
-  async checkLocationPermission(): Promise<boolean> {
-    if (Capacitor.isNativePlatform()) {
-      return this.checkNativeLocationPermission();
-    }
+  async requestCameraPermission(): Promise<boolean> {
+    return Capacitor.isNativePlatform()
+      ? this.requestNativeCameraPermission()
+      : this.requestWebCameraPermission();
+  }
 
-    if (!navigator.permissions) return false;
-
+  private async requestNativeCameraPermission(): Promise<boolean> {
     try {
-      const result = await navigator.permissions.query({
-        name: 'geolocation' as PermissionName,
-      });
-      return result.state === 'granted';
-    } catch {
+      const currentPermissions = await Camera.checkPermissions();
+
+      if (currentPermissions.camera === 'granted') {
+        return true;
+      }
+
+      const permissions = await Camera.requestPermissions();
+      const isGranted = permissions.camera === 'granted';
+
+      if (!isGranted) {
+        console.log('Camera permission denied by user');
+      }
+
+      return isGranted;
+    } catch (error) {
+      console.error('Error checking native camera permission:', error);
       return false;
     }
   }
+
   private async requestNativeLocationPermission(): Promise<boolean> {
     try {
       // First check current permission status
@@ -37,7 +50,6 @@ export class PermissionService {
         return true;
       }
 
-      // Request permissions
       const permissions = await Geolocation.requestPermissions();
       const isGranted = permissions.location === 'granted';
 
@@ -76,5 +88,22 @@ export class PermissionService {
         }
       );
     });
+  }
+
+  private async requestWebCameraPermission(): Promise<boolean> {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      console.warn('Camera API not available in this browser.');
+      return false;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      // Stop the tracks to release the camera
+      stream.getTracks().forEach(track => track.stop());
+      return true;
+    } catch (error) {
+      console.error('Error requesting web camera permission:', error);
+      return false;
+    }
   }
 }

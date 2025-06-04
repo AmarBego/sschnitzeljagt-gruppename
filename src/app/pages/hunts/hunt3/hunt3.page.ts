@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IONIC_COMPONENTS } from '../../../shared/utils/ionic.utils';
@@ -26,33 +26,90 @@ import {
   ],
   providers: [HuntPageHelper],
 })
-export class Hunt3Page extends BaseHuntPage {
+export class Hunt3Page extends BaseHuntPage implements OnInit, OnDestroy {
   override get huntId(): number {
     return 2;
   }
-  scanResult: string | undefined;
+
+  scanResult: string | undefined = undefined;
+  public errorMessage: string | null = null;
+  public isScanSuccessful = false;
+  public scanButtonColor = 'primary';
+  public taskCompletedNotified = false;
+
+  override ngOnInit(): void {
+    super.ngOnInit();
+    this.huntHelper.setTaskCompletedCondition(false);
+    this.resetScanState();
+  }
+
+  override ngOnDestroy(): void {
+    super.ngOnDestroy();
+  }
+
+  resetScanState(): void {
+    this.taskCompletedNotified = false;
+    this.isScanSuccessful = false;
+    this.errorMessage = null;
+    this.scanResult = undefined;
+    this.scanButtonColor = 'primary';
+  }
+
   async scanBarcode(): Promise<void> {
-    // Definiere die Optionen für den Scanner
+    // Don't scan again if already successful
+    if (this.taskCompletedNotified) {
+      console.log('Hunt 3: Scan attempt on already completed task.');
+      return;
+    }
+
+    // Reset state before scanning
+    this.errorMessage = null;
+    this.scanResult = undefined;
+    this.isScanSuccessful = false;
+    this.scanButtonColor = 'primary';
+
     const options: CapacitorBarcodeScannerOptions = {
-      scanButton: true, // Zeigt einen Scan-Button an
-      hint: CapacitorBarcodeScannerTypeHintALLOption.ALL, // Unterstützt alle Barcode-Typen
+      scanButton: false,
+      hint: CapacitorBarcodeScannerTypeHintALLOption.ALL,
     };
 
     try {
-      // Starte den Scan
       const result = await CapacitorBarcodeScanner.scanBarcode(options);
 
-      // Speichere das Ergebnis
-      this.scanResult = result.ScanResult;
-      if (this.scanResult === 'M335@ICT-BZ') {
-        //Hier ist das richtige result
-        console.log('richtigBarcode-Daten:', this.scanResult); //kamera brucht noch zustimmung
-      } else {
-        console.log('Barcode-Datenfalsch:', this.scanResult);
+      if (result.ScanResult) {
+        this.scanResult = result.ScanResult;
+        if (this.scanResult === 'M335@ICT-BZ') {
+          if (!this.taskCompletedNotified) {
+            console.log(
+              'Hunt 3 (Barcode): Correct barcode scanned!',
+              this.scanResult
+            );
+            this.huntHelper.setTaskCompletedCondition(true);
+            this.taskCompletedNotified = true;
+            this.isScanSuccessful = true;
+            this.errorMessage = null;
+          }
+        } else {
+          this.errorMessage = `Incorrect code: "${this.scanResult}". Please scan 'M335@ICT-BZ'.`;
+          this.isScanSuccessful = false;
+          this.scanButtonColor = 'danger';
+        }
       }
-      // Zeige das Ergebnis in der Konsole
-    } catch (error) {
-      console.log('Barcode-Daten:', this.scanResult);
+    } catch (error: any) {
+      if (error && error.message) {
+        if (error.message.toLowerCase().includes('permission denied')) {
+          this.errorMessage =
+            'Camera permission denied. Please enable it in settings.';
+        } else if (error.message.toLowerCase().includes('cancelled')) {
+          // User cancelled, no error needed
+        } else {
+          this.errorMessage = `Scan error: ${error.message}. Please try again.`;
+        }
+      } else {
+        this.errorMessage = 'Unknown error during scan. Please try again.';
+      }
+      this.isScanSuccessful = false;
+      this.scanButtonColor = 'danger';
     }
   }
 }

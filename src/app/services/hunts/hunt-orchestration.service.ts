@@ -29,7 +29,7 @@ export class HuntOrchestrationService {
     this.huntProgressService.updateProgress(progress);
   }
 
-  completeHunt(huntId: number): void {
+  completeHunt(huntId: number, savedDuration?: number): void {
     this.huntValidationService.validateHuntCanBeCompleted(huntId);
     const progress = this.huntProgressService.currentProgress;
     const hunt = this.huntProgressService.findHuntOrFail(huntId);
@@ -37,11 +37,18 @@ export class HuntOrchestrationService {
 
     hunt.isCompleted = true;
     hunt.completionTime = completionTime;
-    hunt.duration = hunt.startTime
-      ? Math.floor(
-          (completionTime.getTime() - new Date(hunt.startTime).getTime()) / 1000
-        )
-      : 0;
+
+    // Use savedDuration if provided, otherwise calculate it
+    if (savedDuration !== undefined) {
+      hunt.duration = savedDuration;
+    } else {
+      hunt.duration = hunt.startTime
+        ? Math.floor(
+            (completionTime.getTime() - new Date(hunt.startTime).getTime()) /
+              1000
+          )
+        : 0;
+    }
 
     if (hunt.maxDuration && hunt.duration > hunt.maxDuration) {
       hunt.isLateCompletion = true;
@@ -52,6 +59,23 @@ export class HuntOrchestrationService {
 
     this.unlockNextHuntInternal(progress, huntId);
     this.timerService.stopTimer();
+    this.huntProgressService.updateProgress(progress);
+  }
+
+  saveHuntDuration(huntId: number, duration: number): void {
+    // No need to validate as we're just saving the duration without changing hunt state
+    const progress = this.huntProgressService.currentProgress;
+    const hunt = this.huntProgressService.findHuntOrFail(huntId);
+
+    // Save the duration without marking the hunt as completed
+    hunt.duration = duration;
+
+    // Check if it's a late completion
+    if (hunt.maxDuration && duration > hunt.maxDuration) {
+      hunt.isLateCompletion = true;
+    }
+
+    // Update progress to save the duration
     this.huntProgressService.updateProgress(progress);
   }
 

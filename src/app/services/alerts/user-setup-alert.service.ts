@@ -80,7 +80,7 @@ export class UserSetupAlertService {
         header: 'Yapp',
         subHeader: 'Permissions Required',
         message:
-          'Location permission is required to use this app. Please grant permission to continue.',
+          'Location and camera permissions are required to use this app. Please grant permission to continue.',
         buttons: [
           {
             text: 'Exit',

@@ -72,4 +72,10 @@ export abstract class BaseHuntPage implements OnInit, OnDestroy {
     }
     return false;
   }
+
+  get completionTime(): number | null {
+    return this.huntHelper.isTaskCompleted
+      ? this.huntHelper.completionTime
+      : null;
+  }
 }

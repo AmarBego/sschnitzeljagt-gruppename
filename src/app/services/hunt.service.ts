@@ -36,8 +36,12 @@ export class HuntService {
     this.huntOrchestrationService.startHunt(huntId);
   }
 
-  completeHunt(huntId: number): void {
-    this.huntOrchestrationService.completeHunt(huntId);
+  completeHunt(huntId: number, savedDuration?: number): void {
+    this.huntOrchestrationService.completeHunt(huntId, savedDuration);
+  }
+
+  saveHuntDuration(huntId: number, duration: number): void {
+    this.huntOrchestrationService.saveHuntDuration(huntId, duration);
   }
 
   skipHunt(huntId: number): void {

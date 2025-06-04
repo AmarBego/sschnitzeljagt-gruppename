@@ -29,6 +29,32 @@ export class OnboardingService {
     }
   }
 
+  private async requestPermissionStep(
+    permissionType: 'location' | 'camera'
+  ): Promise<boolean> {
+    let granted = false;
+    if (permissionType === 'location') {
+      granted = await this.permissionService.requestLocationPermission();
+    } else if (permissionType === 'camera') {
+      granted = await this.permissionService.requestCameraPermission();
+    }
+
+    await this.userService.updateUserPermissions({ [permissionType]: granted });
+
+    if (!granted) {
+      const retry =
+        await this.userSetupAlertService.showPermissionDeniedAlert();
+      if (retry) {
+        return await this.requestPermissionStep(permissionType);
+      }
+      console.warn(
+        `${permissionType} permission denied and user chose not to retry.`
+      );
+      return false;
+    }
+    return true;
+  }
+
   private async handleNewUser(): Promise<void> {
     const userName = await this.userSetupAlertService.showWelcomeAlert();
     if (!userName) {
@@ -36,10 +62,12 @@ export class OnboardingService {
       return;
     }
 
+    const cameraGranted = await this.requestPermissionStep('camera');
+
     const locationGranted = await this.requestPermissionStep('location');
-    if (!locationGranted) {
+    if (!locationGranted || !cameraGranted) {
       await this.userSetupAlertService.showErrorAlert(
-        'Location permission is crucial for the app. Please enable it in settings or restart onboarding.'
+        'Location and camera permissions are crucial for the app. Please enable them in settings or restart onboarding.'
       );
       await this.startOnboardingFlow();
       return;
@@ -49,7 +77,7 @@ export class OnboardingService {
       name: userName,
       permissions: {
         location: locationGranted,
-        camera: false,
+        camera: cameraGranted,
       },
       isSetupComplete: true,
       createdAt: new Date(),
@@ -71,51 +99,7 @@ export class OnboardingService {
       return;
     }
 
-    if (!user.permissions.location) {
-      const locationGranted = await this.requestPermissionStep('location');
-      if (!locationGranted) {
-        console.info(
-          'Location permission is not granted. Some features might be limited.'
-        );
-      }
-    }
-
     await this.navigateToDashboard();
-  }
-
-  private async requestPermissionStep(
-    permissionType: 'location'
-  ): Promise<boolean> {
-    const initialPermissionAccepted =
-      await this.userSetupAlertService.showPermissionAlert();
-
-    if (!initialPermissionAccepted) {
-      await this.userService.updateUserPermissions({ [permissionType]: false });
-      console.warn(
-        `User declined initial prompt for ${permissionType} permission.`
-      );
-      return false;
-    }
-
-    let granted = false;
-    if (permissionType === 'location') {
-      granted = await this.permissionService.requestLocationPermission();
-    }
-
-    await this.userService.updateUserPermissions({ [permissionType]: granted });
-
-    if (!granted) {
-      const retry =
-        await this.userSetupAlertService.showPermissionDeniedAlert();
-      if (retry) {
-        return await this.requestPermissionStep(permissionType);
-      }
-      console.warn(
-        `${permissionType} permission denied and user chose not to retry.`
-      );
-      return false;
-    }
-    return true;
   }
 
   private async navigateToDashboard(): Promise<void> {

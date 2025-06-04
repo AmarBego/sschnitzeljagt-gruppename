@@ -137,7 +137,15 @@ export class DashboardPage implements OnInit, OnDestroy {
       getCurrentState: () => 'reset',
       isVisible: () =>
         this.hunts.some(
-          hunt => hunt.isCompleted || hunt.isSkipped || hunt.startTime
+          hunt =>
+            hunt.isCompleted ||
+            hunt.isSkipped ||
+            hunt.startTime ||
+            hunt.completionTime ||
+            hunt.duration ||
+            hunt.isLateCompletion ||
+            hunt.isUnlocked ||
+            hunt.startTime
         ),
     };
   }
