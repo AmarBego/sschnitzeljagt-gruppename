@@ -80,9 +80,27 @@ export class PermissionService {
     return new Promise(resolve => {
       navigator.geolocation.getCurrentPosition(
         () => resolve(true),
-        () => resolve(false),
+        (error: GeolocationPositionError) => {
+          // Check if running on a web platform
+          if (!Capacitor.isNativePlatform()) {
+            if (error.code === error.PERMISSION_DENIED) {
+              console.warn(
+                'Web location permission explicitly denied by user.'
+              );
+              resolve(false); // User explicitly denied
+            } else {
+              console.warn(
+                `Debug Bypass: Web location acquisition failed (Code: ${error.code}, Message: ${error.message}). Bypassing for debugging on web.`
+              );
+              resolve(true); // Bypass other errors (e.g., position unavailable, timeout) for web
+            }
+          } else {
+            // On native platforms, any error should be treated as a failure.
+            resolve(false);
+          }
+        },
         {
-          timeout: 5000,
+          timeout: 10000, // 10 seconds
           enableHighAccuracy: false,
           maximumAge: 300000, // 5 minutes
         }
@@ -107,7 +125,13 @@ export class PermissionService {
       // Stop the tracks to release the camera
       stream.getTracks().forEach(track => track.stop());
       return true;
-    } catch (error) {
+    } catch (error: any) {
+      if (error.name === 'NotFoundError') {
+        console.warn(
+          'Debug Bypass: Web camera permission request failed because no camera was found (NotFoundError). Bypassing for debugging purposes.'
+        );
+        return true;
+      }
       console.error('Error requesting web camera permission:', error);
       return false;
     }

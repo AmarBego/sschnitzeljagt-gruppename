@@ -29,55 +29,84 @@ export class OnboardingService {
     }
   }
 
-  private async requestPermissionStep(
+  private async fetchPermissionStatus(
     permissionType: 'location' | 'camera'
   ): Promise<boolean> {
-    let granted = false;
     if (permissionType === 'location') {
-      granted = await this.permissionService.requestLocationPermission();
-    } else if (permissionType === 'camera') {
-      granted = await this.permissionService.requestCameraPermission();
+      return await this.permissionService.requestLocationPermission();
+    } else {
+      // 'camera'
+      return await this.permissionService.requestCameraPermission();
+    }
+  }
+
+  private async requestCriticalPermission(
+    permissionType: 'location' | 'camera'
+  ): Promise<boolean> {
+    let granted = await this.fetchPermissionStatus(permissionType);
+    const permissionName =
+      permissionType.charAt(0).toUpperCase() + permissionType.slice(1);
+
+    if (granted) {
+      await this.userService.updateUserPermissions({ [permissionType]: true });
+      return true;
+    }
+
+    // Permission not granted, show alert and ask to retry
+    const retry = await this.userSetupAlertService.showPermissionDeniedAlert(
+      permissionType,
+      permissionName
+    );
+
+    if (retry) {
+      granted = await this.fetchPermissionStatus(permissionType); // Try one more time
     }
 
     await this.userService.updateUserPermissions({ [permissionType]: granted });
 
     if (!granted) {
-      const retry =
-        await this.userSetupAlertService.showPermissionDeniedAlert();
-      if (retry) {
-        return await this.requestPermissionStep(permissionType);
-      }
       console.warn(
-        `${permissionType} permission denied and user chose not to retry.`
+        `${permissionName} permission was ultimately denied by the user after retry attempt or user chose not to retry.`
       );
-      return false;
     }
-    return true;
+    return granted;
   }
 
   private async handleNewUser(): Promise<void> {
     const userName = await this.userSetupAlertService.showWelcomeAlert();
     if (!userName) {
-      await this.startOnboardingFlow();
-      return;
-    }
-
-    const cameraGranted = await this.requestPermissionStep('camera');
-
-    const locationGranted = await this.requestPermissionStep('location');
-    if (!locationGranted || !cameraGranted) {
-      await this.userSetupAlertService.showErrorAlert(
-        'Location and camera permissions are crucial for the app. Please enable them in settings or restart onboarding.'
+      console.log(
+        'User closed or cancelled the name input. Onboarding cannot proceed.'
       );
-      await this.startOnboardingFlow();
       return;
     }
 
+    // Request Camera Permission
+    const cameraGranted = await this.requestCriticalPermission('camera');
+    if (!cameraGranted) {
+      await this.userSetupAlertService.showPermissionErrorAlert(
+        'Camera',
+        'Camera access is crucial for features like scanning QR codes. Please enable Camera permission in your app settings and restart the app to complete onboarding.'
+      );
+      return;
+    }
+
+    // Request Location Permission
+    const locationGranted = await this.requestCriticalPermission('location');
+    if (!locationGranted) {
+      await this.userSetupAlertService.showPermissionErrorAlert(
+        'Location',
+        'Location access is essential for finding nearby activities. Please enable Location permission in your app settings and restart the app to complete onboarding.'
+      );
+      return;
+    }
+
+    // All critical steps passed. Create and save the user.
     const newUser: User = {
       name: userName,
       permissions: {
-        location: locationGranted,
-        camera: cameraGranted,
+        location: locationGranted, // true
+        camera: cameraGranted, // true
       },
       isSetupComplete: true,
       createdAt: new Date(),

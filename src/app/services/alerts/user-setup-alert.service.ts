@@ -55,7 +55,7 @@ export class UserSetupAlertService {
         subHeader: 'Permissions Required',
         cssClass: 'permission-alert',
         message:
-          'This app requires location permission to function properly. Your location data is used only for hunt activities and is not shared with third parties.',
+          'This app requires certain permissions to function. Please grant access when prompted.',
         buttons: [
           {
             text: 'Cancel',
@@ -74,16 +74,18 @@ export class UserSetupAlertService {
     });
   }
 
-  async showPermissionDeniedAlert(): Promise<boolean> {
+  async showPermissionDeniedAlert(
+    permissionType: 'camera' | 'location',
+    permissionName: string
+  ): Promise<boolean> {
     return new Promise(async resolve => {
       const alert = await this.alertController.create({
         header: 'Yapp',
-        subHeader: 'Permissions Required',
-        message:
-          'Location and camera permissions are required to use this app. Please grant permission to continue.',
+        subHeader: `${permissionName} Permission Denied`,
+        message: `${permissionName} access was denied. This permission is needed for certain app features. Would you like to try granting it again?`,
         buttons: [
           {
-            text: 'Exit',
+            text: 'Not Now',
             role: 'cancel',
             handler: () => resolve(false),
           },
@@ -97,6 +99,20 @@ export class UserSetupAlertService {
 
       await alert.present();
     });
+  }
+
+  async showPermissionErrorAlert(
+    permissionName: string,
+    guidance: string
+  ): Promise<void> {
+    const alert = await this.alertController.create({
+      header: 'Yapp',
+      subHeader: `${permissionName} Permission Required`,
+      message: guidance,
+      buttons: ['OK'],
+      backdropDismiss: false, // User must acknowledge
+    });
+    await alert.present();
   }
 
   async showErrorAlert(message: string, subHeader?: string): Promise<void> {

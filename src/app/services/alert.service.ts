@@ -13,17 +13,14 @@ export class AlertService {
   private readonly huntActionAlerts = inject(HuntActionAlertService);
   private readonly notificationAlerts = inject(NotificationAlertService);
 
-  // --- User Setup Alerts ---
-  async showWelcomeAlert(): Promise<string | null> {
-    return this.userSetupAlerts.showWelcomeAlert();
-  }
-
-  async showPermissionAlert(): Promise<boolean> {
-    return this.userSetupAlerts.showPermissionAlert();
-  }
-
-  async showPermissionDeniedAlert(): Promise<boolean> {
-    return this.userSetupAlerts.showPermissionDeniedAlert();
+  async showPermissionDeniedAlert(
+    permissionType: 'camera' | 'location',
+    permissionName: string
+  ): Promise<boolean> {
+    return this.userSetupAlerts.showPermissionDeniedAlert(
+      permissionType,
+      permissionName
+    );
   }
 
   // --- Hunt Action Alerts ---
