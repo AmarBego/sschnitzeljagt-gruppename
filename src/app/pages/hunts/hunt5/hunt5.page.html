@@ -1,13 +1,13 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>Power Play</ion-title>
+    <ion-title>{{ huntData.currentHunt?.title }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
   <ion-header collapse="condense">
     <ion-toolbar>
-      <ion-title size="large">Power Play</ion-title>
+      <ion-title size="large">{{ huntData.currentHunt?.title }}</ion-title>
     </ion-toolbar>
   </ion-header>
 
@@ -21,11 +21,11 @@
   }
 
   <div class="hunt-content">
-    <div class="power-station">
+    <div class="station">
       <div
-        class="power-indicator"
-        [class.charging]="charging"
-        [class.unplugged]="!charging"
+        class="indicator"
+        [class.is-charging]="charging"
+        [class.not-charging]="!charging"
       >
         @if (charging) {
           <ion-icon
@@ -46,10 +46,10 @@
 
       <div class="status-text">
         @if (charging) {
-          <h2 class="charging-text">Charging Detected!</h2>
+          <h2 class="hunt-status-active-text">Charging Detected!</h2>
           <p class="status-description">Great! Your device is now charging.</p>
         } @else {
-          <h2 class="unplugged-text">Power Needed</h2>
+          <h2 class="hunt-status-inactive-text">Power Needed</h2>
           <p class="status-description">Please connect your charger.</p>
         }
       </div>
@@ -89,7 +89,7 @@
       </div>
     </div>
 
-    <div class="power-stats">
+    <div class="hunt-stats">
       <div class="stat-item">
         <ion-icon name="flash-outline"></ion-icon>
         <span>Real-time monitoring</span>

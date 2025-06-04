@@ -69,10 +69,8 @@ export class Hunt5Page extends BaseHuntPage implements OnInit, OnDestroy {
     ) {
       if (currentDeviceIsCharging) {
         await Haptics.impact({ style: ImpactStyle.Medium });
-        console.log('Device plugged in - haptic feedback triggered');
       } else {
         await Haptics.impact({ style: ImpactStyle.Light });
-        console.log('Device unplugged - haptic feedback triggered');
       }
     }
 

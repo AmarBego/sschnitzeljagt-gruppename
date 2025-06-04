@@ -1,13 +1,13 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>First dsDiscovery</ion-title>
+    <ion-title>{{ huntData.currentHunt?.title }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
   <ion-header collapse="condense">
     <ion-toolbar>
-      <ion-title size="large">First Discovery</ion-title>
+      <ion-title size="large">{{ huntData.currentHunt?.title }}</ion-title>
     </ion-toolbar>
   </ion-header>
 
@@ -19,27 +19,105 @@
     >
     </app-hunt-timer>
   }
-  <div class="hunt-content">
-    <p>Scan the Qr Code</p>
-    <p>
-    Welcome to your first hunt! Follow the clues to complete this challenge.
-  </p>
-    <ion-label>Pleas got to the Target</ion-label>
-    @if (isTracking === true) {
 
-      <ion-label>Distance To Target </ion-label>
-      <ion-label>{{ distanceToPoint | number: '1.2-2' }} m </ion-label>
-    } @else {
-      <ion-button (click)="startTracking()">Start Tracking</ion-button>
+  <div class="hunt-content">
+    <div class="station">
+      <div
+        class="indicator"
+        [class.is-tracking]="tracking"
+        [class.not-tracking]="!tracking"
+      >
+        @if (tracking) {
+          <ion-icon
+            name="navigate-outline"
+            class="tracking-icon active-icon"
+          ></ion-icon>
+        } @else {
+          <ion-icon
+            name="navigate-outline"
+            class="tracking-icon inactive-icon"
+          ></ion-icon>
+          <div class="pulse-ring"></div>
+        }
+      </div>
+
+      <div class="status-text">
+        @if (tracking) {
+          <h2 class="hunt-status-active-text">Tracking Active!</h2>
+          @if (distanceToPoint !== null) {
+            <p class="status-description">
+              Distance to Target: {{ distanceToPoint | number: '1.0-0' }} m
+            </p>
+          } @else {
+            <p class="status-description">Acquiring signal...</p>
+          }
+        } @else {
+          <h2 class="hunt-status-inactive-text">Location Needed</h2>
+          <p class="status-description">
+            Press the button to start tracking your location.
+          </p>
+          <ion-button
+            (click)="startTracking()"
+            expand="block"
+            fill="outline"
+            color="primary"
+            class="ion-margin-top"
+            >Start Tracking</ion-button
+          >
+        }
+      </div>
+    </div>
+
+    <div class="instructions-card">
+      <h3>Mission Instructions</h3>
+      <div class="instruction-steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h4>Reach the Destination</h4>
+            <p>
+              Activate tracking and navigate to the marked point on your map.
+              The target is
+              <strong
+                >~{{ predefinedPoint.latitude | number: '1.4-4' }},
+                {{ predefinedPoint.longitude | number: '1.4-4' }}</strong
+              >.
+            </p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h4>Get Close</h4>
+            <p>
+              You need to be within <strong>5 meters</strong> of the target to
+              complete the hunt.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    @if (errorMessage) {
+      <div
+        class="ion-padding ion-text-center"
+        style="color: var(--ion-color-danger)"
+      >
+        <p>{{ errorMessage }}</p>
+      </div>
     }
 
-  </div>
-  <ng-template #inactiveHunt>
-    <div class="hunt-content">
-
-
+    <div class="hunt-stats">
+      <div class="stat-item">
+        <ion-icon name="compass-outline"></ion-icon>
+        <span>Real-time navigation</span>
+      </div>
+      <div class="stat-item">
+        <ion-icon name="walk-outline"></ion-icon>
+        <span>Get moving!</span>
+      </div>
     </div>
-  </ng-template>
+  </div>
 
   <app-animated-action-button
     [availableStates]="actionButtonConfig.availableStates"
