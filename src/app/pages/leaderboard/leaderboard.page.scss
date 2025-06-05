@@ -7,43 +7,44 @@
   --inner-padding-end: 8px;
 
   .rank-indicator {
-    width: 48px; // Increased size for better visual
+    width: 48px;
     height: 48px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
     margin-right: 12px;
-    background-color: var(--ion-color-light-shade);
-    border: 2px solid var(--ion-color-medium-shade);
+
+    // New default style for ranks 4+ (and base for 1-3 before they override)
+    background-color: var(--ion-color-step-850, #404040); // A neutral dark gray
+    border: 2px solid var(--ion-color-step-950, #262626); // A slightly darker border for the dark gray
 
     .rank-number {
       font-size: 1.4em;
       font-weight: bold;
-      color: var(
-        --ion-color-primary-contrast
-      ); // Ensure contrast with background
+      color: #ffffff; // White text by default for ranks 4+
     }
   }
 
-  // Specific styling for top ranks
+  // Specific styling for top ranks (overrides the above for rank-1, rank-2, rank-3)
   &.rank-1 .rank-indicator {
     background-color: #ffd700; // Gold
     border-color: #e6c200;
     .rank-number {
-      color: #333;
-    }
+      color: #333333;
+    } // Dark text for gold
   }
   &.rank-2 .rank-indicator {
     background-color: #c0c0c0; // Silver
     border-color: #adadad;
     .rank-number {
-      color: #333;
-    }
+      color: #333333;
+    } // Dark text for silver
   }
   &.rank-3 .rank-indicator {
     background-color: #cd7f32; // Bronze
     border-color: #b8722c;
+    // .rank-number will inherit white from the new default, which is suitable for bronze
   }
 
   ion-label h2 {
