@@ -15,14 +15,85 @@
   }
 
   <div class="hunt-content">
-    @if (!wificontected && checkStarted === true) {
-      <ion-label>Please conect to Wifi</ion-label>
-    } @else {
-      <ion-label>Please Disconect Form Wifi</ion-label>
-    }
-    @if (!checkStarted) {
-      <ion-button (click)="statrtCheckingConection()"> Start Check</ion-button>
-    }
+    <div class="station">
+      <div
+        class="indicator"
+        [class.is-connected]="wifiConnected"
+        [class.not-connected]="!wifiConnected"
+      >
+        @if (wifiConnected) {
+          <ion-icon
+            name="wifi-outline"
+            class="wifi-icon connected-icon"
+          ></ion-icon>
+          <div class="connection-animation">
+            <div class="signal-bars"></div>
+          </div>
+        } @else {
+          <ion-icon
+            name="close-circle-outline"
+            class="wifi-icon disconnected-icon"
+          ></ion-icon>
+        }
+      </div>
+
+      <div class="status-text">
+        @if (wifiConnected) {
+          <h2 class="hunt-status-active-text">WiFi Connected!</h2>
+          <p class="status-description">Your device is online.</p>
+        } @else {
+          <h2 class="hunt-status-inactive-text">No WiFi Connection</h2>
+          <p class="status-description">Please connect to a WiFi network.</p>
+        }
+      </div>
+    </div>
+
+    <div class="instructions-card">
+      <h3>Mission Instructions</h3>
+      <div class="instruction-steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h4>Check Current Status</h4>
+            <p>See if your device is currently connected to WiFi or not.</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h4>Connection Cycle</h4>
+            <p>
+              If disconnected:
+              <strong>Connect &rarr; Disconnect &rarr; Connect again</strong>
+            </p>
+            <p>
+              If connected:
+              <strong>Disconnect &rarr; Connect &rarr; Disconnect again</strong>
+            </p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h4>Feel the Vibration</h4>
+            <p>Experience haptic feedback with each connection state change.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hunt-stats">
+      <div class="stat-item">
+        <ion-icon name="wifi-outline"></ion-icon>
+        <span>Real-time monitoring</span>
+      </div>
+      <div class="stat-item">
+        <ion-icon name="hardware-chip-outline"></ion-icon>
+        <span>Haptic feedback enabled</span>
+      </div>
+    </div>
   </div>
 
   <app-animated-action-button

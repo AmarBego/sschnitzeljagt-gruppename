@@ -18,6 +18,7 @@
     <div class="station">
       <div
         class="indicator"
+        [class.scan-to-start]="!isScanSuccessful"
         [class.scan-success]="isScanSuccessful"
         [class.scan-error]="errorMessage"
         (click)="!isScanSuccessful && scanBarcode()"

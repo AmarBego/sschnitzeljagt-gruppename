@@ -6,6 +6,7 @@ import { AnimatedActionButtonComponent } from '../../../shared/components/animat
 import { HuntTimerComponent } from '../../../shared/components/hunt-timer/hunt-timer.component';
 import { BaseHuntPage } from '../../../shared/utils/base-hunt.page';
 import { Network, ConnectionStatus } from '@capacitor/network';
+import { Haptics, ImpactStyle } from '@capacitor/haptics';
 
 @Component({
   selector: 'app-hunt6',
@@ -24,64 +25,188 @@ export class Hunt6Page extends BaseHuntPage implements OnInit, OnDestroy {
   override get huntId(): number {
     return 4;
   }
-  private wifiState: ConnectionStatus | null = null;
-  protected wificontected: boolean = false;
-  protected passConditon1: boolean = false;
-  protected passConditon2: boolean = false;
-  private intervalId: any;
-  protected checkStarted: boolean = false;
+
+  wifiConnected: boolean | undefined = false;
+  private wifiCheckIntervalId?: number;
+  private previousWifiStateHaptics: boolean | undefined = undefined;
+
+  private taskCompletionNotified = false;
+  private initialDeviceWifiState?: boolean;
+  private powerCycleProgress = 0;
 
   override ngOnInit(): void {
     super.ngOnInit();
+    this.taskCompletionNotified = false;
+    this.powerCycleProgress = 0;
+    this.initialDeviceWifiState = undefined;
+    this.previousWifiStateHaptics = undefined;
+
+    this.startWifiCheck();
   }
 
   override ngOnDestroy(): void {
     super.ngOnDestroy();
-    this.stopCheckingWifi();
+    this.stopWifiCheck();
   }
 
-  protected statrtCheckingConection(): void {
-    // Start checking Wi-Fi state every 1 second
-    this.checkStarted = true;
-    this.intervalId = setInterval(() => {
-      this.checkWifiState();
-    }, 3000);
-  }
-
-  private stopCheckingWifi(): void {
-    // Clean up the interval when the component is destroyed
-    if (this.intervalId) {
-      clearInterval(this.intervalId);
+  private async checkWifiStatus() {
+    if (this.taskCompletionNotified) {
+      if (this.wifiCheckIntervalId) this.stopWifiCheck();
+      return;
     }
-  }
 
-  async checkWifiState(): Promise<ConnectionStatus | null> {
-    try {
-      this.wifiState = await Network.getStatus();
-      console.log(this.wifiState);
+    const networkStatus = await Network.getStatus();
+    const currentDeviceIsWifiConnected =
+      networkStatus.connected && networkStatus.connectionType === 'wifi';
 
-      if (
-        this.wifiState.connected === true &&
-        this.wifiState.connectionType === 'wifi'
-      ) {
-        this.wificontected = true;
-        this.passConditon1 = true;
+    this.wifiConnected = currentDeviceIsWifiConnected;
+
+    if (
+      this.previousWifiStateHaptics !== undefined &&
+      this.previousWifiStateHaptics !== currentDeviceIsWifiConnected
+    ) {
+      if (currentDeviceIsWifiConnected) {
+        await Haptics.impact({ style: ImpactStyle.Medium });
       } else {
-        this.wificontected = false;
-        if (this.passConditon1 === true) {
-          this.passConditon2 = true;
+        await Haptics.impact({ style: ImpactStyle.Light });
+      }
+    }
+
+    if (this.initialDeviceWifiState === undefined) {
+      this.initialDeviceWifiState = currentDeviceIsWifiConnected;
+      console.log(
+        `Hunt 6: Initial WiFi state for cycle: ${this.initialDeviceWifiState}`
+      );
+    } else {
+      const lastIntervalActualState = this.previousWifiStateHaptics;
+
+      if (currentDeviceIsWifiConnected !== lastIntervalActualState) {
+        console.log(
+          `Hunt 6: Cycle relevant state change. Progress: ${this.powerCycleProgress}, Initial: ${this.initialDeviceWifiState}, LastIntervalState: ${lastIntervalActualState}, Current: ${currentDeviceIsWifiConnected}`
+        );
+
+        // Logic for when initial state was WiFi Disconnected
+        if (this.initialDeviceWifiState === false) {
+          if (
+            this.powerCycleProgress === 0 &&
+            currentDeviceIsWifiConnected === true // Disconnected -> Connected
+          ) {
+            this.powerCycleProgress = 1;
+            console.log('Hunt 6: Cycle step 1 (Disconnected -> Connected)');
+          } else if (
+            this.powerCycleProgress === 1 &&
+            currentDeviceIsWifiConnected === false // Connected -> Disconnected
+          ) {
+            this.powerCycleProgress = 2;
+            console.log('Hunt 6: Cycle step 2 (Connected -> Disconnected)');
+          } else if (
+            this.powerCycleProgress === 2 &&
+            currentDeviceIsWifiConnected === true // Disconnected -> Connected
+          ) {
+            this.powerCycleProgress = 3;
+            console.log(
+              'Hunt 6: Cycle step 3 (Disconnected -> Connected) - COMPLETE'
+            );
+          } else if (
+            currentDeviceIsWifiConnected === this.initialDeviceWifiState &&
+            this.powerCycleProgress !== 0 &&
+            this.powerCycleProgress < 3
+          ) {
+            console.log(
+              'Hunt 6: Cycle broken (returned to initial state mid-sequence), reset to step 0.'
+            );
+            this.powerCycleProgress = 0;
+          } else if (
+            this.powerCycleProgress > 0 &&
+            currentDeviceIsWifiConnected !== !lastIntervalActualState && // e.g. progress 1 (expected false), current is true
+            this.powerCycleProgress < 3
+          ) {
+            console.log(
+              'Hunt 6: Cycle broken (unexpected state change), reset to step 0.'
+            );
+            this.powerCycleProgress = 0;
+          }
+        }
+        // Logic for when initial state was WiFi Connected
+        else {
+          if (
+            this.powerCycleProgress === 0 &&
+            currentDeviceIsWifiConnected === false // Connected -> Disconnected
+          ) {
+            this.powerCycleProgress = 1;
+            console.log('Hunt 6: Cycle step 1 (Connected -> Disconnected)');
+          } else if (
+            this.powerCycleProgress === 1 &&
+            currentDeviceIsWifiConnected === true // Disconnected -> Connected
+          ) {
+            this.powerCycleProgress = 2;
+            console.log('Hunt 6: Cycle step 2 (Disconnected -> Connected)');
+          } else if (
+            this.powerCycleProgress === 2 &&
+            currentDeviceIsWifiConnected === false // Connected -> Disconnected
+          ) {
+            this.powerCycleProgress = 3;
+            console.log(
+              'Hunt 6: Cycle step 3 (Connected -> Disconnected) - COMPLETE'
+            );
+          } else if (
+            currentDeviceIsWifiConnected === this.initialDeviceWifiState &&
+            this.powerCycleProgress !== 0 &&
+            this.powerCycleProgress < 3
+          ) {
+            console.log(
+              'Hunt 6: Cycle broken (returned to initial state mid-sequence), reset to step 0.'
+            );
+            this.powerCycleProgress = 0;
+          } else if (
+            this.powerCycleProgress > 0 &&
+            currentDeviceIsWifiConnected !== !lastIntervalActualState &&
+            this.powerCycleProgress < 3
+          ) {
+            console.log(
+              'Hunt 6: Cycle broken (unexpected state change), reset to step 0.'
+            );
+            this.powerCycleProgress = 0;
+          }
+        }
+
+        if (this.powerCycleProgress === 3 && !this.taskCompletionNotified) {
+          console.log('Hunt 6: WiFi cycle fully completed!');
+          this._onTaskConditionMet();
+          this.taskCompletionNotified = true;
+          Haptics.impact({ style: ImpactStyle.Heavy }).catch(err =>
+            console.error('Haptic error', err)
+          );
+          this.stopWifiCheck();
+          return;
         }
       }
-      if (this.passConditon2 === true && this.passConditon1) {
-        this.stopCheckingWifi();
-        console.log('Hunt 6: WiFi sequence successful (Page Logic)');
-        this._onTaskConditionMet();
-      }
-      return this.wifiState;
-    } catch (error) {
-      console.error('Error checking Wi-Fi state:', error);
-      this.wifiState = null;
-      return null;
+    }
+
+    this.previousWifiStateHaptics = currentDeviceIsWifiConnected;
+  }
+
+  private async startWifiCheck() {
+    // Optional: Initial haptic feedback when check starts
+    // await Haptics.impact({ style: ImpactStyle.Light });
+    console.log('Started WiFi monitoring');
+
+    // Check immediately once, then set interval
+    await this.checkWifiStatus();
+
+    this.wifiCheckIntervalId = window.setInterval(() => {
+      this.checkWifiStatus();
+    }, 1000); // Check every 1 second, same as hunt5
+  }
+
+  private async stopWifiCheck() {
+    if (this.wifiCheckIntervalId !== undefined) {
+      clearInterval(this.wifiCheckIntervalId);
+      this.wifiCheckIntervalId = undefined;
+
+      // Optional: Haptic feedback when check stops
+      // await Haptics.impact({ style: ImpactStyle.Light });
+      console.log('Stopped WiFi monitoring');
     }
   }
 }

@@ -2,7 +2,7 @@
   <div class="timer-display">
     <div class="timer-main">
       <ion-icon name="time-outline" class="timer-icon"></ion-icon>
-      <span class="timer-text">{{ formatTime(timer) }}</span>
+      <span class="timer-text">{{ formatTime(displayTime) }}</span>
     </div>
     @if (hunt && hunt.maxDuration) {
       <div class="max-duration">Max: {{ formatTime(hunt.maxDuration) }}</div>
