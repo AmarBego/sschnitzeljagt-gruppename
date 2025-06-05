@@ -29,6 +29,7 @@ export class Hunt5Page extends BaseHuntPage implements OnInit, OnDestroy {
   charging: boolean | undefined = false;
   private batteryCheckIntervalId?: number;
   private previousChargingStateHaptics: boolean | undefined = undefined;
+  public isSuccessful: boolean = false;
 
   private taskCompletionNotified = false;
   private initialDeviceChargingState?: boolean;
@@ -37,6 +38,7 @@ export class Hunt5Page extends BaseHuntPage implements OnInit, OnDestroy {
   override ngOnInit(): void {
     super.ngOnInit();
     this.taskCompletionNotified = false;
+    this.isSuccessful = false;
     this.powerCycleProgress = 0;
     this.initialDeviceChargingState = undefined;
     this.previousChargingStateHaptics = undefined;
@@ -166,6 +168,7 @@ export class Hunt5Page extends BaseHuntPage implements OnInit, OnDestroy {
           console.log('Hunt 5: Power cycle fully completed!');
           this._onTaskConditionMet();
           this.taskCompletionNotified = true;
+          this.isSuccessful = true;
           Haptics.impact({ style: ImpactStyle.Heavy }).catch(err =>
             console.error('Haptic error', err)
           );

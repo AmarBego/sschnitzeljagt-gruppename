@@ -32,12 +32,14 @@ export class Hunt1Page extends BaseHuntPage implements OnInit, OnDestroy {
   public distanceToPoint: number | null = null;
   public errorMessage: string | null = null;
   public tracking: boolean = false;
+  public isSuccessful: boolean = false;
   private locationInterval: any = null;
   private taskCompletedNotified = false;
 
   override ngOnInit(): void {
     super.ngOnInit();
     this.taskCompletedNotified = false;
+    this.isSuccessful = false;
     this.startTracking();
   }
 
@@ -85,6 +87,7 @@ export class Hunt1Page extends BaseHuntPage implements OnInit, OnDestroy {
         console.log('Hunt 1: Location target reached!');
         this._onTaskConditionMet();
         this.taskCompletedNotified = true;
+        this.isSuccessful = true;
         this.stopTracking();
       }
       this.errorMessage = null;

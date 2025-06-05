@@ -18,10 +18,16 @@
     <div class="station">
       <div
         class="indicator"
-        [class.is-connected]="wifiConnected"
-        [class.not-connected]="!wifiConnected"
+        [class.is-successful]="isSuccessful"
+        [class.is-connected]="wifiConnected && !isSuccessful"
+        [class.not-connected]="!wifiConnected && !isSuccessful"
       >
-        @if (wifiConnected) {
+        @if (isSuccessful) {
+          <ion-icon
+            name="checkmark-circle-outline"
+            class="status-icon success-icon"
+          ></ion-icon>
+        } @else if (wifiConnected) {
           <ion-icon
             name="wifi-outline"
             class="wifi-icon connected-icon"
@@ -38,7 +44,15 @@
       </div>
 
       <div class="status-text">
-        @if (wifiConnected) {
+        @if (isSuccessful) {
+          <h2
+            class="hunt-status-active-text"
+            style="color: var(--ion-color-success)"
+          >
+            Success!
+          </h2>
+          <p class="status-description">Task Completed!</p>
+        } @else if (wifiConnected) {
           <h2 class="hunt-status-active-text">WiFi Connected!</h2>
           <p class="status-description">Your device is online.</p>
         } @else {

@@ -29,6 +29,7 @@ export class Hunt6Page extends BaseHuntPage implements OnInit, OnDestroy {
   wifiConnected: boolean | undefined = false;
   private wifiCheckIntervalId?: number;
   private previousWifiStateHaptics: boolean | undefined = undefined;
+  public isSuccessful: boolean = false;
 
   private taskCompletionNotified = false;
   private initialDeviceWifiState?: boolean;
@@ -37,6 +38,7 @@ export class Hunt6Page extends BaseHuntPage implements OnInit, OnDestroy {
   override ngOnInit(): void {
     super.ngOnInit();
     this.taskCompletionNotified = false;
+    this.isSuccessful = false;
     this.powerCycleProgress = 0;
     this.initialDeviceWifiState = undefined;
     this.previousWifiStateHaptics = undefined;
@@ -174,6 +176,7 @@ export class Hunt6Page extends BaseHuntPage implements OnInit, OnDestroy {
           console.log('Hunt 6: WiFi cycle fully completed!');
           this._onTaskConditionMet();
           this.taskCompletionNotified = true;
+          this.isSuccessful = true;
           Haptics.impact({ style: ImpactStyle.Heavy }).catch(err =>
             console.error('Haptic error', err)
           );

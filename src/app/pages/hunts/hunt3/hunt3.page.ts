@@ -31,7 +31,7 @@ export class Hunt3Page extends BaseHuntPage implements OnInit, OnDestroy {
 
   scanResult: string | undefined = undefined;
   public errorMessage: string | null = null;
-  public isScanSuccessful = false;
+  public isSuccessful: boolean = false;
   public scanButtonColor = 'primary';
   public taskCompletedNotified = false;
 
@@ -46,7 +46,7 @@ export class Hunt3Page extends BaseHuntPage implements OnInit, OnDestroy {
 
   resetScanState(): void {
     this.taskCompletedNotified = false;
-    this.isScanSuccessful = false;
+    this.isSuccessful = false;
     this.errorMessage = null;
     this.scanResult = undefined;
     this.scanButtonColor = 'primary';
@@ -62,7 +62,7 @@ export class Hunt3Page extends BaseHuntPage implements OnInit, OnDestroy {
     // Reset state before scanning
     this.errorMessage = null;
     this.scanResult = undefined;
-    this.isScanSuccessful = false;
+    this.isSuccessful = false;
     this.scanButtonColor = 'primary';
 
     const options: CapacitorBarcodeScannerOptions = {
@@ -83,12 +83,12 @@ export class Hunt3Page extends BaseHuntPage implements OnInit, OnDestroy {
             );
             this._onTaskConditionMet();
             this.taskCompletedNotified = true;
-            this.isScanSuccessful = true;
+            this.isSuccessful = true;
             this.errorMessage = null;
           }
         } else {
           this.errorMessage = `Incorrect code: "${this.scanResult}". Please scan 'M335@ICT-BZ'.`;
-          this.isScanSuccessful = false;
+          this.isSuccessful = false;
           this.scanButtonColor = 'danger';
         }
       }
@@ -105,7 +105,7 @@ export class Hunt3Page extends BaseHuntPage implements OnInit, OnDestroy {
       } else {
         this.errorMessage = 'Unknown error during scan. Please try again.';
       }
-      this.isScanSuccessful = false;
+      this.isSuccessful = false;
       this.scanButtonColor = 'danger';
     }
   }
