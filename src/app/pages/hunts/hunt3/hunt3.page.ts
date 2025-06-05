@@ -28,7 +28,7 @@ import {
 })
 export class Hunt3Page extends BaseHuntPage {
   override get huntId(): number {
-    return 3;
+    return 2;
   }
   scanResult: string | undefined;
   async scanBarcode(): Promise<void> {
