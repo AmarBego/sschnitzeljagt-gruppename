@@ -6,6 +6,7 @@ export interface User {
   };
   isSetupComplete: boolean;
   createdAt: Date;
+  hasSubmittedFinalStats?: boolean;
 }
 
 export interface LocationPermissionState {

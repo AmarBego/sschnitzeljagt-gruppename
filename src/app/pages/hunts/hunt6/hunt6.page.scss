@@ -23,6 +23,7 @@
 
   &.is-successful {
     background: #6bff7c;
+    color: #000000;
     animation: power-glow 2s ease-in-out infinite alternate;
 
     &::before {

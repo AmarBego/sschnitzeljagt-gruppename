@@ -35,6 +35,8 @@ import {
   logOutOutline,
   refreshCircleOutline,
   playSkipForwardOutline,
+  alarmOutline,
+  hourglassOutline,
 } from 'ionicons/icons';
 import { HuntService } from './services/hunt.service';
 import { Subject } from 'rxjs';
@@ -84,6 +86,8 @@ export class AppComponent implements OnInit, OnDestroy {
       logOutOutline,
       refreshCircleOutline,
       playSkipForwardOutline,
+      alarmOutline,
+      hourglassOutline,
     });
   }
 

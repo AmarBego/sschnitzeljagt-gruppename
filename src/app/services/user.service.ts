@@ -329,4 +329,108 @@ export class UserService {
       hunt => hunt.isCompleted || hunt.isSkipped === true
     );
   }
+
+  /**
+   * Update a user's record in the global yapp_users list.
+   */
+  private async _updateUserInGlobalList(updatedUser: User): Promise<void> {
+    if (!updatedUser || !updatedUser.name) {
+      console.warn(
+        '[UserService] Attempted to update user in global list without valid user object or name.'
+      );
+      return;
+    }
+    const allUsers = this.getAllUsers();
+    const userIndex = allUsers.findIndex(u => u.name === updatedUser.name);
+
+    if (userIndex !== -1) {
+      allUsers[userIndex] = { ...allUsers[userIndex], ...updatedUser }; // Merge to preserve other fields if any new ones are added elsewhere
+      try {
+        localStorage.setItem(this.USERS_KEY, JSON.stringify(allUsers));
+        console.log(
+          `[UserService] Updated user ${updatedUser.name} in global list.`
+        );
+      } catch (error) {
+        console.error(
+          `[UserService] Failed to update user ${updatedUser.name} in global list:`,
+          error
+        );
+        // Potentially throw or handle, but for now, log and continue
+      }
+    } else {
+      console.warn(
+        `[UserService] User ${updatedUser.name} not found in global list for update.`
+      );
+      // This case implies the user might not have been registered, which would be an issue.
+      // However, markStatsAsSubmitted should only be called for an existing, registered user.
+    }
+  }
+
+  /**
+   * Prepares data for submission to Google Form.
+   */
+  prepareGoogleFormData(
+    user: User,
+    huntProgress: HuntProgress
+  ): {
+    name: string;
+    normallyCompleted: number;
+    skipped: number;
+    durationString: string;
+  } | null {
+    if (!user || !huntProgress || !huntProgress.hunts) {
+      console.error(
+        '[UserService] Cannot prepare Google Form data: Invalid user or hunt progress.'
+      );
+      return null;
+    }
+
+    const completedNonSkippedHunts = huntProgress.hunts.filter(
+      h => h.isCompleted && !h.isSkipped
+    );
+
+    const normallyCompleted = completedNonSkippedHunts.filter(
+      h => !h.isLateCompletion
+    ).length;
+
+    const skipped = huntProgress.hunts.filter(h => h.isSkipped === true).length;
+
+    let totalDurationSeconds = 0;
+    for (const hunt of completedNonSkippedHunts) {
+      totalDurationSeconds += hunt.duration || 0;
+    }
+
+    const hours = Math.floor(totalDurationSeconds / 3600);
+    const minutes = Math.floor((totalDurationSeconds % 3600) / 60);
+    const seconds = totalDurationSeconds % 60;
+    const durationString = `${hours.toString().padStart(2, '0')}:${minutes
+      .toString()
+      .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+    return {
+      name: user.name,
+      normallyCompleted,
+      skipped,
+      durationString,
+    };
+  }
+
+  /**
+   * Marks the current user's stats as submitted and updates their record.
+   */
+  async markStatsAsSubmitted(): Promise<void> {
+    const currentUser = this.currentUser;
+    if (!currentUser) {
+      console.warn('[UserService] No current user to mark stats as submitted.');
+      return;
+    }
+
+    const updatedUser = { ...currentUser, hasSubmittedFinalStats: true };
+
+    await this.saveUser(updatedUser); // Updates current session user (yapp_user)
+    await this._updateUserInGlobalList(updatedUser); // Updates user in global list (yapp_users)
+    console.log(
+      `[UserService] Marked final stats as submitted for user: ${currentUser.name}`
+    );
+  }
 }

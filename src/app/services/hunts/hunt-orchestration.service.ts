@@ -38,7 +38,6 @@ export class HuntOrchestrationService {
     hunt.isCompleted = true;
     hunt.completionTime = completionTime;
 
-    // Use savedDuration if provided, otherwise calculate it
     if (savedDuration !== undefined) {
       hunt.duration = savedDuration;
     } else {
@@ -60,6 +59,7 @@ export class HuntOrchestrationService {
     this.unlockNextHuntInternal(progress, huntId);
     this.timerService.stopTimer();
     this.huntProgressService.updateProgress(progress);
+    this._checkAndSubmitFinalStats();
   }
 
   saveHuntDuration(huntId: number, duration: number): void {
@@ -95,6 +95,7 @@ export class HuntOrchestrationService {
     const progress = this.huntProgressService.currentProgress;
     this.markHuntAsSkippedInternal(progress, huntId, reason); // Pass reason
     this.huntProgressService.updateProgress(progress);
+    this._checkAndSubmitFinalStats();
   }
 
   // Renamed to avoid conflict if HuntAppEventsService needs a public version
@@ -157,6 +158,97 @@ export class HuntOrchestrationService {
       }
     } else {
       this.timerService.stopTimer();
+    }
+    // It might be prudent to check for submission here too if a user reloads mid-completion
+    // However, for now, keeping it tied to explicit complete/skip actions.
+  }
+
+  private async _postToGoogleForm(data: {
+    name: string;
+    normallyCompleted: number;
+    skipped: number;
+    durationString: string;
+  }): Promise<void> {
+    const url =
+      'https://docs.google.com/forms/u/0/d/e/1FAIpQLSc9v68rbCckYwcIekRLOaVZ0Qdm3eeh1xCEkgpn3d7pParfLQ/formResponse';
+
+    // entry.1860183935=Name (User's Name)
+    // entry.564282981=Schnitzel (isCompleted && !isSkipped && !isLateCompletion)
+    // entry.1079317865=Potato (isSkipped)
+    // entry.985590604=Hours:Minutes:Seconds (Duration)
+
+    const body =
+      `entry.1860183935=${encodeURIComponent(data.name)}` +
+      `&entry.564282981=${data.normallyCompleted}` +
+      `&entry.1079317865=${data.skipped}` +
+      `&entry.985590604=${encodeURIComponent(data.durationString)}`;
+
+    const headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        mode: 'no-cors', // Important for Google Forms to avoid CORS issues when submitting from client-side
+        headers,
+        body,
+      });
+      // With no-cors, we can't inspect the response status directly for success (it will be opaque)
+      // So we assume success if the request itself doesn't throw an error.
+      console.log(
+        '[HuntOrchestrationService] Successfully submitted final stats to Google Form (no-cors response).',
+        response
+      );
+    } catch (error) {
+      console.error(
+        '[HuntOrchestrationService] Error submitting final stats to Google Form:',
+        error
+      );
+      // Decide if markStatsAsSubmitted should still proceed. For now, we will let it proceed.
+    }
+  }
+
+  private async _checkAndSubmitFinalStats(): Promise<void> {
+    const currentUser = this.userService.currentUser;
+
+    if (!currentUser) {
+      console.log(
+        '[HuntOrchestrationService] No current user, cannot submit final stats.'
+      );
+      return;
+    }
+
+    if (currentUser.hasSubmittedFinalStats) {
+      console.log(
+        `[HuntOrchestrationService] Final stats already submitted for user: ${currentUser.name}.`
+      );
+      return;
+    }
+
+    // Check if all tasks are completed for the current user
+    if (await this.userService.areAllCurrentUserTasksCompleted()) {
+      console.log(
+        `[HuntOrchestrationService] All tasks completed for user: ${currentUser.name}. Preparing to submit final stats.`
+      );
+      const huntProgress = this.huntProgressService.currentProgress;
+      const googleFormData = this.userService.prepareGoogleFormData(
+        currentUser,
+        huntProgress
+      );
+
+      if (googleFormData) {
+        await this._postToGoogleForm(googleFormData);
+        // Mark as submitted regardless of POST success to prevent re-submission attempts from client for this run.
+        // Server-side validation or a more robust queueing system would be needed for guaranteed delivery.
+        await this.userService.markStatsAsSubmitted();
+      } else {
+        console.error(
+          '[HuntOrchestrationService] Failed to prepare Google Form data. Cannot submit.'
+        );
+      }
+    } else {
+      console.log(
+        `[HuntOrchestrationService] Not all tasks completed for user: ${currentUser.name}. Final stats not submitted yet.`
+      );
     }
   }
 }
