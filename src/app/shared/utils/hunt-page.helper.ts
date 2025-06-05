@@ -1,6 +1,6 @@
 import { Injectable, inject, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, BehaviorSubject } from 'rxjs';
 import { HuntService } from '../../services/hunt.service';
 import { TimerService } from '../../services/timer.service';
 import { Hunt, HuntProgress } from '../../models/hunt.model';
@@ -30,6 +30,9 @@ export class HuntPageHelper implements OnDestroy {
   private readonly router = inject(Router);
   private readonly destroy$ = new Subject<void>();
 
+  // New BehaviorSubject to track if task-specific completion condition is met
+  private taskSpecificConditionMet = new BehaviorSubject<boolean>(false);
+
   private currentHuntId?: number;
   private huntPageData: HuntPageData = {
     timer: 0,
@@ -43,6 +46,7 @@ export class HuntPageHelper implements OnDestroy {
     callback: (data: HuntPageData) => void
   ): void {
     this.currentHuntId = huntId;
+    this.taskSpecificConditionMet.next(false); // Reset for the new hunt being initialized
 
     // Subscribe to hunt progress changes
     this.huntService.progress$
@@ -131,14 +135,13 @@ export class HuntPageHelper implements OnDestroy {
       getCurrentState: () => {
         const hunt = this.huntPageData.currentHunt;
         if (!hunt || !hunt.isUnlocked) return '';
+
         if (this.isCurrentHuntActiveAndModifiable) {
-          // Use HuntService for overdue check
-          if (
-            hunt.id !== undefined &&
-            this.huntService.isHuntOverdue(hunt.id)
-          ) {
+          if (this.taskSpecificConditionMet.value) {
+            // Check our new condition
             return 'complete';
           }
+          // If task condition not met, default to 'skip' as per previous change
           return 'skip';
         }
         return '';
@@ -151,6 +154,11 @@ export class HuntPageHelper implements OnDestroy {
         return this.isCurrentHuntActiveAndModifiable;
       },
     };
+  }
+
+  // Public method for hunt pages to set the condition
+  setTaskCompletedCondition(isMet: boolean): void {
+    this.taskSpecificConditionMet.next(isMet);
   }
 
   // Format timer display

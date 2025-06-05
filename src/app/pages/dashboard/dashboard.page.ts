@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject, takeUntil } from 'rxjs';
 import { UserService } from '../../services/user.service';
@@ -9,12 +9,16 @@ import { Hunt, HuntProgress } from '../../models/hunt.model';
 import { IONIC_COMPONENTS } from '../../shared/utils/ionic.utils';
 import { HuntNavigationService } from '../../services/hunts/hunt-navigation.service'; // Added import
 import { AnimatedActionButtonComponent } from '../../shared/components/animated-action-button/animated-action-button.component';
+import { ModalController } from '@ionic/angular/standalone';
+import { HuntStatsModalPage } from '../../modals/hunt-stats-modal/hunt-stats-modal.page';
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.page.html',
   styleUrls: ['./dashboard.page.scss'],
+  standalone: true,
   imports: [CommonModule, ...IONIC_COMPONENTS, AnimatedActionButtonComponent],
+  providers: [ModalController],
 })
 export class DashboardPage implements OnInit, OnDestroy {
   hunts: Hunt[] = [];
@@ -27,7 +31,8 @@ export class DashboardPage implements OnInit, OnDestroy {
     private huntService: HuntService,
     private alertService: AlertService,
     private modalService: ModalService,
-    private huntNavigationService: HuntNavigationService // Injected service
+    private huntNavigationService: HuntNavigationService, // Injected service
+    private ionicModalController: ModalController // New Ionic ModalController
   ) {}
 
   ngOnInit(): void {
@@ -99,6 +104,24 @@ export class DashboardPage implements OnInit, OnDestroy {
 
   async onHelpClick(): Promise<void> {
     await this.modalService.showHelpModal();
+  }
+
+  async openHuntStatsModal() {
+    const currentProgress = this.huntService.currentProgress;
+    if (!currentProgress || !currentProgress.hunts) {
+      console.warn('No hunt progress available to display stats.');
+      // Optionally, show an alert to the user
+      // await this.alertService.showAlert({header: 'No Stats', message: 'Complete some hunts to see stats!'});
+      return;
+    }
+
+    const modal = await this.ionicModalController.create({
+      component: HuntStatsModalPage,
+      componentProps: {
+        allHunts: currentProgress.hunts,
+      },
+    });
+    await modal.present();
   }
 
   // Dashboard action button configuration

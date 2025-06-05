@@ -15,6 +15,10 @@ import {
   warningOutline,
   batteryDeadOutline,
   batteryChargingOutline,
+  statsChartOutline,
+  flashOutline,
+  phonePortraitOutline,
+  sadOutline,
 } from 'ionicons/icons';
 import { HuntService } from './services/hunt.service';
 import { Subject } from 'rxjs';
@@ -46,6 +50,10 @@ export class AppComponent implements OnInit, OnDestroy {
       warningOutline,
       batteryDeadOutline,
       batteryChargingOutline,
+      statsChartOutline,
+      flashOutline,
+      phonePortraitOutline,
+      sadOutline,
     });
   }
 

@@ -1,0 +1,31 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Completed Hunt Stats</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()" color="danger">Close</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-list *ngIf="completedHunts.length > 0; else noHunts">
+    <ion-item *ngFor="let hunt of completedHunts" lines="inset">
+      <ion-label>
+        <h2>{{ hunt.title }}</h2>
+        <p>Status: {{ getHuntDisplayStatus(hunt) }}</p>
+        <p *ngIf="!hunt.isSkipped && hunt.duration !== undefined">
+          Time Taken: {{ formatDuration(hunt.duration) }}
+        </p>
+        <p *ngIf="hunt.isSkipped && hunt.duration !== undefined">
+          Duration at Skip: {{ formatDuration(hunt.duration) }}
+        </p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+  <ng-template #noHunts>
+    <div class="ion-text-center ion-padding-top">
+      <ion-icon name="sad-outline" size="large"></ion-icon>
+      <p>No hunts completed yet.</p>
+    </div>
+  </ng-template>
+</ion-content>
