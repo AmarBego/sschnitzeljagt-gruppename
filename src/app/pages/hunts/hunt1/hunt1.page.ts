@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IONIC_COMPONENTS } from '../../../shared/utils/ionic.utils';
@@ -26,22 +26,22 @@ export class Hunt1Page extends BaseHuntPage {
   override get huntId(): number {
     return 1;
   }
-  private predefinedPoint = {
-    latitude: 47.027592,
-    longitude: 8.301001,
+  public predefinedPoint = {
+    latitude: 47.02755556,
+    longitude: 8.301,
   };
   public userLocation: { latitude: number; longitude: number } | null = null;
   public distanceToPoint: number | null = null;
   public errorMessage: string | null = null;
-  public isTracking: boolean = false;
+  public tracking: boolean = false;
   private locationInterval: any = null;
 
   constructor(private huntPageHelper: HuntPageHelper) {
     super();
   }
   startTracking() {
-    if (this.isTracking) return; // Prevent multiple intervals
-    this.isTracking = true;
+    if (this.tracking) return; // Prevent multiple intervals
+    this.tracking = true;
     this.getUserLocation();
     this.locationInterval = setInterval(() => {
       this.getUserLocation();
@@ -52,10 +52,10 @@ export class Hunt1Page extends BaseHuntPage {
     if (this.locationInterval) {
       clearInterval(this.locationInterval);
       this.locationInterval = null;
-      this.isTracking = false;
+      this.tracking = false;
     }
   }
-  async getUserLocation() {
+  private async getUserLocation() {
     try {
       // Get current position
       const position: Position = await Geolocation.getCurrentPosition({
@@ -75,7 +75,7 @@ export class Hunt1Page extends BaseHuntPage {
         this.predefinedPoint
       );
       if (this.distanceToPoint < 5) {
-        console.log('Am Ziel');
+        console.log('Made it!');
         this.stopTracking();
       }
       this.errorMessage = null;
@@ -91,7 +91,7 @@ export class Hunt1Page extends BaseHuntPage {
     coords1: { latitude: number; longitude: number },
     coords2: { latitude: number; longitude: number }
   ): number {
-    const R = 6371e3; // Earth's radius in meters
+    const R = 6378137; // Earth's radius in meters
     const lat1Rad = coords1.latitude * (Math.PI / 180);
     const lat2Rad = coords2.latitude * (Math.PI / 180);
     const deltaLat = (coords2.latitude - coords1.latitude) * (Math.PI / 180);

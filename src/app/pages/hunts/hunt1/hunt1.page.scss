@@ -1,0 +1,36 @@
+.indicator {
+  &.is-tracking {
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
+    animation: power-glow 2s ease-in-out infinite alternate;
+
+    &::before {
+      content: "";
+      position: absolute;
+      inset: -10px;
+      border-radius: 50%;
+      background: linear-gradient(45deg, #4facfe, #00f2fe);
+      animation: gradient-spin 3s linear infinite;
+      z-index: -1;
+      filter: blur(15px);
+      opacity: 0.7;
+    }
+  }
+
+  &.not-tracking {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+    animation: power-pulse 1.5s ease-in-out infinite;
+  }
+}
+
+.tracking-icon {
+  font-size: 4rem;
+  z-index: 2;
+  color: #ffffff;
+}
+
+.navigate-animation {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}

@@ -3,50 +3,50 @@ import { Hunt } from '../models/hunt.model';
 export const INITIAL_HUNTS: Hunt[] = [
   {
     id: 1,
-    title: 'First Discovery',
-    description: 'Find your first clue',
+    title: 'Secret Location',
+    description: 'Find the secret spot',
     isCompleted: false,
     isUnlocked: true,
     maxDuration: 300,
   }, // 5 minutes
   {
     id: 2,
-    title: 'Hidden Path',
-    description: 'Follow the hidden trail',
+    title: 'Walk the walk',
+    description: 'Walk a certain distance',
     isCompleted: false,
     isUnlocked: false,
-    maxDuration: 10,
-  }, // 7.5 minutes
+    maxDuration: 240,
+  }, // 4 minutes
   {
     id: 3,
-    title: 'Secret Location',
-    description: 'Discover the secret spot',
+    title: 'Scan the truth',
+    description: 'Scan the true QR code',
     isCompleted: false,
     isUnlocked: false,
-    maxDuration: 600,
-  }, // 10 minutes
+    maxDuration: 120,
+  }, // 2 minutes
   {
     id: 4,
-    title: 'Ancient Marker',
-    description: 'Find the ancient marker',
+    title: 'Do a barrel roll',
+    description: 'Rotate the phone to the correct angle',
     isCompleted: false,
     isUnlocked: false,
-    maxDuration: 360,
-  }, // 6 minutes
+    maxDuration: 30,
+  }, // 0.5 minutes
   {
     id: 5,
-    title: 'Final Treasure',
-    description: 'Locate the final treasure',
+    title: 'Power Play',
+    description: 'Test your device charging skills',
     isCompleted: false,
     isUnlocked: false,
-    maxDuration: 540,
-  }, // 9 minutes
+    maxDuration: 60,
+  }, // 1 minute
   {
     id: 6,
-    title: 'Ultimate Prize',
-    description: 'Claim your ultimate prize',
+    title: 'Connectivity',
+    description: 'Test your connectivity skills',
     isCompleted: false,
     isUnlocked: false,
-    maxDuration: 420,
-  }, // 7 minutes
+    maxDuration: 120,
+  }, // 2 minutes
 ];
