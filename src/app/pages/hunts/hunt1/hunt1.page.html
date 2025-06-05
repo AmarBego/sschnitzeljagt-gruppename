@@ -1,6 +1,6 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>First Discovery</ion-title>
+    <ion-title>First dsDiscovery</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -19,12 +19,25 @@
     >
     </app-hunt-timer>
   }
+  <div class="hunt-content">
+    <p>Scan the Qr Code</p>
+    <p>
+    Welcome to your first hunt! Follow the clues to complete this challenge.
+  </p>
+    <ion-label>Pleas got to the Target</ion-label>
+    @if (isTracking === true) {
 
+      <ion-label>Distance To Target </ion-label>
+      <ion-label>{{ distanceToPoint | number: '1.2-2' }} m </ion-label>
+    } @else {
+      <ion-button (click)="startTracking()">Start Tracking</ion-button>
+    }
+
+  </div>
   <ng-template #inactiveHunt>
     <div class="hunt-content">
-      <p>
-        Welcome to your first hunt! Follow the clues to complete this challenge.
-      </p>
+
+
     </div>
   </ng-template>
 
