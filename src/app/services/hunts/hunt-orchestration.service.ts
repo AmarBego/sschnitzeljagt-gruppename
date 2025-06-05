@@ -166,7 +166,7 @@ export class HuntOrchestrationService {
   private async _postToGoogleForm(data: {
     name: string;
     normallyCompleted: number;
-    skipped: number;
+    lateCompletion: number;
     durationString: string;
   }): Promise<void> {
     const url =
@@ -174,13 +174,13 @@ export class HuntOrchestrationService {
 
     // entry.1860183935=Name (User's Name)
     // entry.564282981=Schnitzel (isCompleted && !isSkipped && !isLateCompletion)
-    // entry.1079317865=Potato (isSkipped)
+    // entry.1079317865=Potato (isLateCompletion)
     // entry.985590604=Hours:Minutes:Seconds (Duration)
 
     const body =
       `entry.1860183935=${encodeURIComponent(data.name)}` +
       `&entry.564282981=${data.normallyCompleted}` +
-      `&entry.1079317865=${data.skipped}` +
+      `&entry.1079317865=${data.lateCompletion}` +
       `&entry.985590604=${encodeURIComponent(data.durationString)}`;
 
     const headers = { 'Content-Type': 'application/x-www-form-urlencoded' };

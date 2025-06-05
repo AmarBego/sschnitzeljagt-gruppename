@@ -375,7 +375,7 @@ export class UserService {
   ): {
     name: string;
     normallyCompleted: number;
-    skipped: number;
+    lateCompletion: number;
     durationString: string;
   } | null {
     if (!user || !huntProgress || !huntProgress.hunts) {
@@ -393,7 +393,9 @@ export class UserService {
       h => !h.isLateCompletion
     ).length;
 
-    const skipped = huntProgress.hunts.filter(h => h.isSkipped === true).length;
+    const lateCompletion = huntProgress.hunts.filter(
+      h => h.isLateCompletion === true
+    ).length;
 
     let totalDurationSeconds = 0;
     for (const hunt of completedNonSkippedHunts) {
@@ -410,7 +412,7 @@ export class UserService {
     return {
       name: user.name,
       normallyCompleted,
-      skipped,
+      lateCompletion,
       durationString,
     };
   }

@@ -17,6 +17,7 @@ export interface HuntPageData {
   currentHunt?: Hunt;
   timer: number;
   isHuntActive: boolean;
+  isOverdue: boolean;
 }
 
 export interface HuntActionButtonConfig {
@@ -51,6 +52,7 @@ export abstract class BaseHuntPage implements OnInit, OnDestroy {
     currentHunt: undefined,
     timer: 0,
     isHuntActive: false,
+    isOverdue: false,
   };
 
   protected taskSpecificConditionMet = new BehaviorSubject<boolean>(false);
@@ -72,6 +74,11 @@ export abstract class BaseHuntPage implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe((timerValue: number | null) => {
         this.huntData.timer = timerValue ?? 0;
+        if (this.huntData.currentHunt && this.huntData.isHuntActive) {
+          this.huntData.isOverdue =
+            !!this.huntData.currentHunt.maxDuration &&
+            this.huntData.timer > this.huntData.currentHunt.maxDuration;
+        }
       });
   }
 
@@ -84,15 +91,20 @@ export abstract class BaseHuntPage implements OnInit, OnDestroy {
     }
 
     let isActuallyActive = false;
+    let isOverdueForData = false;
     if (hunt) {
       const isCurrentByProgress = progress.currentActiveHunt === this.huntId;
       isActuallyActive = isCurrentByProgress && !!hunt.startTime;
+      if (isActuallyActive && hunt.maxDuration) {
+        isOverdueForData = this.huntData.timer > hunt.maxDuration;
+      }
     }
 
     this.huntData = {
       currentHunt: hunt,
       timer: this.huntData.timer,
       isHuntActive: isActuallyActive,
+      isOverdue: isOverdueForData,
     };
   }
 
