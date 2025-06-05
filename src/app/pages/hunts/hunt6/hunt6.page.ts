@@ -59,11 +59,9 @@ export class Hunt6Page extends BaseHuntPage implements OnInit, OnDestroy {
         this.wificontected = true;
         this.passConditon1 = true;
       } else {
-        if (this.wifiState.connectionType === 'none') {
-          this.wificontected = false;
-          if (this.passConditon1 === true) {
-            this.passConditon2 = true;
-          }
+        this.wificontected = false;
+        if (this.passConditon1 === true) {
+          this.passConditon2 = true;
         }
       }
       if (this.passConditon2 === true && this.passConditon1) {
