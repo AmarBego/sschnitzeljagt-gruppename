@@ -235,22 +235,23 @@ export class UserService {
       console.log(
         `[UserService] Hunt progress for ${user.name}:`,
         JSON.parse(JSON.stringify(huntProgress))
-      ); // Deep copy for logging
+      );
 
-      const completedNonSkippedHunts = huntProgress.hunts.filter(h => {
-        const included = h.isCompleted && !h.isSkipped;
-        // console.log(`[UserService] User ${user.name}, Hunt ID ${h.id}: isCompleted=${h.isCompleted}, isSkipped=${h.isSkipped}, Included=${included}`);
-        return included;
-      });
+      const completedNonSkippedHunts = huntProgress.hunts.filter(
+        h => h.isCompleted && !h.isSkipped
+      );
 
+      // User must have at least one completed, non-skipped hunt to be on the leaderboard
       if (completedNonSkippedHunts.length === 0) {
         console.log(
-          `[UserService] No completed, non-skipped hunts for user: ${user.name}`
+          `[UserService] No completed, non-skipped hunts for user: ${user.name}. Not adding to leaderboard.`
         );
         continue;
       }
+
+      const numHuntsCompleted = completedNonSkippedHunts.length;
       console.log(
-        `[UserService] User ${user.name} has ${completedNonSkippedHunts.length} relevant hunts for leaderboard.`
+        `[UserService] User ${user.name} has ${numHuntsCompleted} completed (non-skipped) hunts.`
       );
 
       let totalDuration = 0;
@@ -266,28 +267,48 @@ export class UserService {
         }
       }
 
+      const numHuntsSkipped = huntProgress.hunts.filter(
+        h => h.isSkipped === true
+      ).length;
+      console.log(
+        `[UserService] User ${user.name} has ${numHuntsSkipped} skipped hunts.`
+      );
+
       rankedUsers.push({
         userName: user.name,
         totalDuration,
+        numHuntsCompleted,
         numLateCompletions,
+        numHuntsSkipped,
       });
       console.log(
-        `[UserService] Added ${user.name} to potential leaderboard entries with duration ${totalDuration}, late: ${numLateCompletions}`
+        `[UserService] Added ${user.name} to potential leaderboard: duration ${totalDuration}, completed ${numHuntsCompleted}, late ${numLateCompletions}, skipped ${numHuntsSkipped}`
       );
     }
 
     rankedUsers.sort((a, b) => {
+      // Primary: Ascending totalDuration
       if (a.totalDuration !== b.totalDuration) {
         return a.totalDuration - b.totalDuration;
       }
-      return a.numLateCompletions - b.numLateCompletions;
+      // Secondary: Ascending numLateCompletions
+      if (a.numLateCompletions !== b.numLateCompletions) {
+        return a.numLateCompletions - b.numLateCompletions;
+      }
+      // Tertiary: Descending numHuntsCompleted (more completed is better for a tie)
+      if (a.numHuntsCompleted !== b.numHuntsCompleted) {
+        return b.numHuntsCompleted - a.numHuntsCompleted;
+      }
+      // Quaternary: Ascending numHuntsSkipped (fewer skipped is better for a tie, though less critical)
+      // If all else is equal, someone who skipped fewer hunts might be ranked slightly higher.
+      return a.numHuntsSkipped - b.numHuntsSkipped;
     });
 
     console.log(
-      '[UserService] Final top 3 ranked users:',
-      rankedUsers.slice(0, 3)
+      '[UserService] Final ranked users (all):',
+      JSON.parse(JSON.stringify(rankedUsers))
     );
-    return rankedUsers.slice(0, 3); // Top 3 users
+    return rankedUsers; // Return all qualifying users
   }
 
   /**

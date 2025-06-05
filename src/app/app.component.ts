@@ -34,6 +34,7 @@ import {
   trophyOutline,
   logOutOutline,
   refreshCircleOutline,
+  playSkipForwardOutline,
 } from 'ionicons/icons';
 import { HuntService } from './services/hunt.service';
 import { Subject } from 'rxjs';
@@ -82,6 +83,7 @@ export class AppComponent implements OnInit, OnDestroy {
       trophyOutline,
       logOutOutline,
       refreshCircleOutline,
+      playSkipForwardOutline,
     });
   }
 

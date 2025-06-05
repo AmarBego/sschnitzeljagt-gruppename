@@ -17,7 +17,7 @@
   @if (leaderboardData.length > 0) {
     <ion-list lines="inset" class="leaderboard-list">
       <ion-list-header>
-        <ion-label color="primary">Top Players</ion-label>
+        <ion-label color="primary">Player Rankings</ion-label>
       </ion-list-header>
       @for (entry of leaderboardData; track entry.userName; let i = $index) {
         <ion-item class="leaderboard-item" [ngClass]="'rank-' + (i + 1)">
@@ -26,21 +26,44 @@
           </div>
           <ion-label>
             <h2>{{ entry.userName }}</h2>
-            <p>
-              Time:
-              <ion-text color="secondary"
-                ><strong>{{
-                  formatDuration(entry.totalDuration)
-                }}</strong></ion-text
-              >
-            </p>
-            @if (entry.numLateCompletions > 0) {
-              <p>
-                <ion-text color="warning"
-                  >{{ entry.numLateCompletions }} late completion(s)</ion-text
+            <div class="stats-grid">
+              <p class="stat-item">
+                <ion-icon name="hourglass-outline" color="secondary"></ion-icon>
+                Time:
+                <ion-text color="secondary"
+                  ><strong>{{
+                    formatDuration(entry.totalDuration)
+                  }}</strong></ion-text
                 >
               </p>
-            }
+              <p class="stat-item">
+                <ion-icon
+                  name="checkmark-done-outline"
+                  color="success"
+                ></ion-icon>
+                Completed:
+                <ion-text color="success"
+                  ><strong>{{ entry.numHuntsCompleted }}</strong></ion-text
+                >
+              </p>
+              <p class="stat-item">
+                <ion-icon name="alarm-outline" color="warning"></ion-icon>
+                Late:
+                <ion-text color="warning"
+                  ><strong>{{ entry.numLateCompletions }}</strong></ion-text
+                >
+              </p>
+              <p class="stat-item">
+                <ion-icon
+                  name="play-skip-forward-outline"
+                  color="medium"
+                ></ion-icon>
+                Skipped:
+                <ion-text color="medium"
+                  ><strong>{{ entry.numHuntsSkipped }}</strong></ion-text
+                >
+              </p>
+            </div>
           </ion-label>
         </ion-item>
       }
@@ -53,9 +76,10 @@
         aria-hidden="true"
       ></ion-icon>
       <h3>No Champions Yet</h3>
-      <p>Complete hunts to climb the ranks!</p>
+      <p>Complete hunts (without skipping) to climb the ranks!</p>
     </div>
   }
+
   <app-animated-action-button
     [availableStates]="leaderboardFabConfig.availableStates"
     [handlers]="leaderboardFabConfig.handlers"
