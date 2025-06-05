@@ -1,5 +1,13 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  inject,
+  signal,
+  WritableSignal,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { UserService } from '../../services/user.service';
 import { HuntService } from '../../services/hunt.service';
@@ -8,7 +16,10 @@ import { ModalService } from '../../services/modal.service';
 import { Hunt, HuntProgress } from '../../models/hunt.model';
 import { IONIC_COMPONENTS } from '../../shared/utils/ionic.utils';
 import { HuntNavigationService } from '../../services/hunts/hunt-navigation.service'; // Added import
-import { AnimatedActionButtonComponent } from '../../shared/components/animated-action-button/animated-action-button.component';
+import {
+  AnimatedActionButtonComponent,
+  ActionButtonState,
+} from '../../shared/components/animated-action-button/animated-action-button.component';
 import { ModalController } from '@ionic/angular/standalone';
 import { HuntStatsModalPage } from '../../shared/components/hunt-stats-modal/hunt-stats-modal.page';
 
@@ -23,6 +34,7 @@ import { HuntStatsModalPage } from '../../shared/components/hunt-stats-modal/hun
 export class DashboardPage implements OnInit, OnDestroy {
   hunts: Hunt[] = [];
   currentActiveHunt?: number;
+  allTasksCompletedSignal: WritableSignal<boolean> = signal(false); // Added signal
 
   private destroy$ = new Subject<void>();
 
@@ -32,7 +44,8 @@ export class DashboardPage implements OnInit, OnDestroy {
     private alertService: AlertService,
     private modalService: ModalService,
     private huntNavigationService: HuntNavigationService, // Injected service
-    private ionicModalController: ModalController // New Ionic ModalController
+    private ionicModalController: ModalController, // New Ionic ModalController
+    private router: Router // Injected Router
   ) {}
 
   ngOnInit(): void {
@@ -49,9 +62,11 @@ export class DashboardPage implements OnInit, OnDestroy {
       .subscribe((progress: HuntProgress) => {
         this.hunts = progress.hunts;
         this.currentActiveHunt = progress.currentActiveHunt;
+        this.updateCompletionStatus(); // Update completion status when progress changes
       });
 
     this.loadInitialData();
+    this.updateCompletionStatus(); // Initial check
   }
 
   ngOnDestroy(): void {
@@ -126,27 +141,65 @@ export class DashboardPage implements OnInit, OnDestroy {
 
   // Dashboard action button configuration
   get dashboardActionButtonConfig() {
+    const allTasksCompleted = this.allTasksCompletedSignal(); // Read from signal
+    const anyProgress = this.hunts.some(
+      hunt => hunt.isCompleted || hunt.isSkipped || hunt.startTime
+    );
+
+    let availableStates: string[] = [];
+    let currentState = '';
+
+    if (allTasksCompleted) {
+      availableStates = ['viewLeaderboard', 'reset']; // Offer both if all complete
+      currentState = 'viewLeaderboard'; // Default to leaderboard if all done
+    } else if (anyProgress) {
+      availableStates = ['reset'];
+      currentState = 'reset';
+    }
+
+    const configState: ActionButtonState = {
+      ...AnimatedActionButtonComponent.DEFAULT_STATES,
+      reset: {
+        icon: 'refresh-circle-outline',
+        color: 'warning',
+        label: 'Reset Progress',
+        position: 'start' as 'start',
+      },
+      viewLeaderboard: {
+        icon: 'trophy-outline',
+        color: 'success',
+        label: 'View Leaderboard',
+        position: 'end' as 'end',
+      },
+    };
+
     return {
-      availableStates: ['reset'],
+      availableStates,
       handlers: {
         reset: async () => {
           await this.onResetProgress();
         },
+        viewLeaderboard: async () => {
+          this.router.navigate(['/leaderboard']);
+        },
       },
-      stateConfig: AnimatedActionButtonComponent.DEFAULT_STATES,
-      getCurrentState: () => 'reset',
-      isVisible: () =>
-        this.hunts.some(
-          hunt =>
-            hunt.isCompleted ||
-            hunt.isSkipped ||
-            hunt.startTime ||
-            hunt.completionTime ||
-            hunt.duration ||
-            hunt.isLateCompletion ||
-            hunt.isUnlocked ||
-            hunt.startTime
-        ),
+      stateConfig: configState,
+      getCurrentState: () => {
+        // Re-evaluate in case state changes
+        if (this.allTasksCompletedSignal()) {
+          // Read from signal
+          return 'viewLeaderboard';
+        }
+        if (
+          this.hunts.some(
+            hunt => hunt.isCompleted || hunt.isSkipped || hunt.startTime
+          )
+        ) {
+          return 'reset';
+        }
+        return ''; // No button active if no progress and not all tasks done (should not happen based on isVisible)
+      },
+      isVisible: () => allTasksCompleted || anyProgress,
     };
   }
 
@@ -156,6 +209,7 @@ export class DashboardPage implements OnInit, OnDestroy {
     if (shouldReset) {
       try {
         await this.huntService.resetProgress();
+        this.updateCompletionStatus(); // Refresh completion status after reset
       } catch (error) {
         await this.alertService.showErrorAlert(
           'Failed to reset progress. Please try again.'
@@ -166,5 +220,10 @@ export class DashboardPage implements OnInit, OnDestroy {
 
   private loadInitialData(): void {
     // Implementation of loadInitialData method
+  }
+
+  async updateCompletionStatus(): Promise<void> {
+    const completed = await this.userService.areAllCurrentUserTasksCompleted();
+    this.allTasksCompletedSignal.set(completed);
   }
 }

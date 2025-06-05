@@ -31,6 +31,9 @@ import {
   hardwareChipOutline,
   wifiOutline,
   alertCircleOutline,
+  trophyOutline,
+  logOutOutline,
+  refreshCircleOutline,
 } from 'ionicons/icons';
 import { HuntService } from './services/hunt.service';
 import { Subject } from 'rxjs';
@@ -76,6 +79,9 @@ export class AppComponent implements OnInit, OnDestroy {
       wifiOutline,
       hardwareChipOutline,
       alertCircleOutline,
+      trophyOutline,
+      logOutOutline,
+      refreshCircleOutline,
     });
   }
 

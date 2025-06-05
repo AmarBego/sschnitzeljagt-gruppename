@@ -81,6 +81,19 @@ export class OnboardingService {
       return;
     }
 
+    // Check if username is taken BEFORE proceeding with permissions
+    const isTaken = await this.userService.isUsernameTaken(userName);
+    if (isTaken) {
+      await this.userSetupAlertService.showErrorAlert(
+        'Username Taken',
+        `The name "${userName}" is already in use. Please choose a different name.`
+      );
+      // Optionally, restart the name input or the onboarding flow
+      // For now, we will just stop and let the user retry by restarting the app or flow.
+      // this.startOnboardingFlow(); // This could cause a loop if not handled carefully
+      return; // Stop onboarding for this attempt
+    }
+
     // Request Camera Permission
     const cameraGranted = await this.requestCriticalPermission('camera');
     if (!cameraGranted) {
@@ -112,6 +125,9 @@ export class OnboardingService {
       createdAt: new Date(),
     };
 
+    // First, register the user in the global list
+    await this.userService.registerUser(newUser);
+    // Then, save the user as the current session user
     await this.userService.saveUser(newUser);
     await this.navigateToDashboard();
   }

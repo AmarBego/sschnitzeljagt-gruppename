@@ -1,0 +1,69 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/dashboard"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Leaderboard</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <ion-header collapse="condense">
+    <ion-toolbar color="primary">
+      <ion-title size="large">Leaderboard</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  @if (leaderboardData.length > 0) {
+    <ion-list lines="inset" class="leaderboard-list">
+      <ion-list-header>
+        <ion-label color="primary">Top Players</ion-label>
+      </ion-list-header>
+      @for (entry of leaderboardData; track entry.userName; let i = $index) {
+        <ion-item class="leaderboard-item" [ngClass]="'rank-' + (i + 1)">
+          <div slot="start" class="rank-indicator">
+            <span class="rank-number">{{ i + 1 }}</span>
+          </div>
+          <ion-label>
+            <h2>{{ entry.userName }}</h2>
+            <p>
+              Time:
+              <ion-text color="secondary"
+                ><strong>{{
+                  formatDuration(entry.totalDuration)
+                }}</strong></ion-text
+              >
+            </p>
+            @if (entry.numLateCompletions > 0) {
+              <p>
+                <ion-text color="warning"
+                  >{{ entry.numLateCompletions }} late completion(s)</ion-text
+                >
+              </p>
+            }
+          </ion-label>
+        </ion-item>
+      }
+    </ion-list>
+  } @else {
+    <div class="empty-state ion-text-center">
+      <ion-icon
+        name="trophy-outline"
+        class="empty-icon"
+        aria-hidden="true"
+      ></ion-icon>
+      <h3>No Champions Yet</h3>
+      <p>Complete hunts to climb the ranks!</p>
+    </div>
+  }
+  <app-animated-action-button
+    [availableStates]="leaderboardFabConfig.availableStates"
+    [handlers]="leaderboardFabConfig.handlers"
+    [stateConfig]="leaderboardFabConfig.stateConfig"
+    [getState]="leaderboardFabConfig.getCurrentState"
+    [isVisible]="leaderboardFabConfig.isVisible"
+    position="bottom-end"
+    size="default"
+  >
+  </app-animated-action-button>
+</ion-content>

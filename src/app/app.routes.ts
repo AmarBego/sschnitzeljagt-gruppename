@@ -63,4 +63,11 @@ export const routes: Routes = [
     canActivate: [onboardingGuard, huntAccessGuard],
     canDeactivate: [huntPageGuard],
   },
+  {
+    path: 'leaderboard',
+    loadComponent: () =>
+      import('./pages/leaderboard/leaderboard.page').then(
+        m => m.LeaderboardPage
+      ),
+  },
 ];

@@ -1,0 +1,90 @@
+.leaderboard-list {
+  margin-bottom: 70px; // Ensure FAB doesn't overlap last item
+}
+
+.leaderboard-item {
+  --padding-start: 8px; // Reduce default padding a bit if rank-indicator is used
+  --inner-padding-end: 8px;
+
+  .rank-indicator {
+    width: 48px; // Increased size for better visual
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    margin-right: 12px;
+    background-color: var(--ion-color-light-shade);
+    border: 2px solid var(--ion-color-medium-shade);
+
+    .rank-number {
+      font-size: 1.4em;
+      font-weight: bold;
+      color: var(
+        --ion-color-primary-contrast
+      ); // Ensure contrast with background
+    }
+  }
+
+  // Specific styling for top ranks
+  &.rank-1 .rank-indicator {
+    background-color: #ffd700; // Gold
+    border-color: #e6c200;
+    .rank-number {
+      color: #333;
+    }
+  }
+  &.rank-2 .rank-indicator {
+    background-color: #c0c0c0; // Silver
+    border-color: #adadad;
+    .rank-number {
+      color: #333;
+    }
+  }
+  &.rank-3 .rank-indicator {
+    background-color: #cd7f32; // Bronze
+    border-color: #b8722c;
+  }
+
+  ion-label h2 {
+    font-weight: 600;
+    color: var(--ion-color-dark-shade);
+  }
+
+  ion-label p {
+    font-size: 0.9em;
+    color: var(--ion-color-medium-shade);
+  }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: calc(100% - 100px); // Adjust based on header/footer or other elements
+  min-height: 200px;
+  padding: 20px;
+
+  .empty-icon {
+    font-size: 5rem; // Larger icon
+    color: var(--ion-color-medium-tint);
+    margin-bottom: 20px;
+  }
+
+  h3 {
+    color: var(--ion-color-dark-shade);
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  p {
+    color: var(--ion-color-medium-shade);
+    max-width: 300px;
+  }
+}
+
+// Ensure content padding works well with fullscreen and FAB
+ion-content.ion-padding {
+  --padding-bottom: 80px; // Extra padding at the bottom for the FAB
+}

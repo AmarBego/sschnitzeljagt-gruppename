@@ -128,9 +128,12 @@ export class HuntOrchestrationService {
   }
 
   resetUserProgress(): void {
-    this.huntProgressService.resetProgress();
-    this.userService.clearUserData(); // Clear associated user data
+    this.huntProgressService.resetProgress(); // Resets hunt progress in its own storage
+    this.userService.resetCurrentUserProgressAndSession(); // Clears hunt progress from user service perspective and logs out
     this.timerService.stopTimer(); // Ensure timer is stopped
+    console.log(
+      '[HuntOrchestrationService] User progress and session fully reset.'
+    );
   }
 
   reloadUserProgress(): void {

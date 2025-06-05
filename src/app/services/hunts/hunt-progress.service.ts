@@ -79,4 +79,21 @@ export class HuntProgressService {
     const hunt = this.findHuntOrFail(huntId); // Uses the local findHuntOrFail
     return hunt?.maxDuration;
   }
+
+  /**
+   * Retrieve hunt progress for a specified user without modifying current progress.
+   */
+  getProgressForUser(userName: string): HuntProgress {
+    const key = `${userName.toLowerCase().replace(/\s+/g, '_')}_${this.STORAGE_KEY}`;
+    const stored = localStorage.getItem(key);
+    if (!stored) {
+      return this.getInitialProgress();
+    }
+    try {
+      return JSON.parse(stored) as HuntProgress;
+    } catch {
+      console.error(`Failed to parse hunt progress for user ${userName}`);
+      return this.getInitialProgress();
+    }
+  }
 }
